@@ -2,7 +2,7 @@
  * @name ImageUtilities
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 5.5.3
+ * @version 5.5.5
  * @description Adds several Utilities for Images/Videos (Gallery, Download, Reverse Search, Zoom, Copy, etc.)
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -30,9 +30,9 @@ module.exports = (_ => {
 				else return r.text();
 			}).then(b => {
 				if (!b) throw new Error();
-				else return require("fs").writeFile(require("path").join(BdApi.Plugins.folder, "0BDFDB.plugin.js"), b, _ => BdApi.showToast("Finished downloading BDFDB Library", {type: "success"}));
+				else return require("fs").writeFile(require("path").join(BdApi.Plugins.folder, "0BDFDB.plugin.js"), b, _ => BdApi.UI.showToast("Finished downloading BDFDB Library", {type: "success"}));
 			}).catch(error => {
-				BdApi.alert("Error", "Could not download BDFDB Library Plugin. Try again later or download it manually from GitHub: https://mwittrien.github.io/downloader/?library");
+				BdApi.UI.alert("Error", "Could not download BDFDB Library Plugin. Try again later or download it manually from GitHub: https://mwittrien.github.io/downloader/?library");
 			});
 		}
 		
@@ -40,7 +40,7 @@ module.exports = (_ => {
 			if (!window.BDFDB_Global || !Array.isArray(window.BDFDB_Global.pluginQueue)) window.BDFDB_Global = Object.assign({}, window.BDFDB_Global, {pluginQueue: []});
 			if (!window.BDFDB_Global.downloadModal) {
 				window.BDFDB_Global.downloadModal = true;
-				BdApi.showConfirmationModal("Library Missing", `The Library Plugin needed for ${this.name} is missing. Please click "Download Now" to install it.`, {
+				BdApi.UI.showConfirmationModal("Library Missing", `The Library Plugin needed for ${this.name} is missing. Please click "Download Now" to install it.`, {
 					confirmText: "Download Now",
 					cancelText: "Cancel",
 					onCancel: _ => {delete window.BDFDB_Global.downloadModal;},
@@ -336,6 +336,12 @@ module.exports = (_ => {
 						transform: unset !important;
 						filter: unset !important;
 						backdrop-filter: unset !important;
+					}
+					${BDFDB.dotCN._imageutilitiesviewer} {
+						pointer-events: none;
+					}
+					${BDFDB.dotCN._imageutilitiesviewer} > * > *${BDFDB.notCN._imageutilitiesdetailswrapper} {
+						pointer-events: initial;
 					}
 					${BDFDB.dotCN._imageutilitiesgallery} ~ ${BDFDB.dotCN.imagemodalnavbutton} {
 						display: none;
@@ -908,29 +914,38 @@ module.exports = (_ => {
 								const imageThrowaway = document.createElement(isVideo ? "video" : "img");
 								imageThrowaway.addEventListener(isVideo ? "loadedmetadata" : "load", function() {
 									_this.cacheClickedImage(target);
-									let modalData;
-									BDFDB.LibraryModules.ModalUtils.openModal(m => modalData = m, {Layer: _ => BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.ImageModalOuter, {
-										onClose: modalData.onClose,
-										className: BDFDB.disCN.imagemodal,
-										items: [isVideo ? {
-											src: imageThrowaway.src,
-											poster: _this.getPosterUrl(imageThrowaway.src),
-											width: this.videoWidth,
-											naturalWidth: this.videoWidth,
-											height: this.videoHeight,
-											naturalHeight: this.videoHeight
-										} : {
-											animated: false,
-											height: this.height,
-											original: imageThrowaway.src,
-											srcIsAnimated: false,
-											trigger: "CLICK",
-											type: "IMAGE",
-											url: imageThrowaway.src,
-											width: this.width,
-											zoomThumbnailPlaceholder: imageThrowaway.src
-										}]
-									}, true)});
+									let open = _ => BDFDB.LibraryModules.ModalUtils.openModal(modalData => {
+										return BDFDB.ReactUtils.createElement("div", {
+											className: _this.settings.viewerSettings.details && BDFDB.disCN._imageutilitiesdetailsadded,
+											children: BDFDB.ReactUtils.createElement("div", {
+												className: BDFDB.disCNS.modalcarouselmodal + BDFDB.disCNS.imagemodal + BDFDB.disCNS.modal + BDFDB.disCN._imageutilitiesviewer,
+												children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.ImageModal, {
+													location: "LazyImageZoomable",
+													onClose: _ => modalData.onClose(),
+													items: [isVideo ? {
+														src: imageThrowaway.src,
+														poster: _this.getPosterUrl(imageThrowaway.src),
+														width: this.videoWidth,
+														naturalWidth: this.videoWidth,
+														height: this.videoHeight,
+														naturalHeight: this.videoHeight
+													} : {
+														animated: false,
+														height: this.height,
+														original: imageThrowaway.src,
+														srcIsAnimated: false,
+														trigger: "CLICK",
+														type: "IMAGE",
+														url: imageThrowaway.src,
+														width: this.width,
+														zoomThumbnailPlaceholder: imageThrowaway.src
+													}]
+												})
+											})
+										}, true);
+									});
+									if (BDFDB.LibraryComponents.ImageModal != "div") open();
+									else BDFDB.ModuleUtils.lazyLoadModuleImports(BDFDB.LibraryComponents.ImageModalOuter).then(_ => open());	
 								});
 								imageThrowaway.src = urlData.src || urlData.file;
 							}

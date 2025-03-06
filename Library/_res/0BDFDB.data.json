@@ -166,7 +166,7 @@
 		}},
 		"KeyEvents": {"props": ["aliases", "code", "codes"]},
 		"LanguageUtils": {"props": ["getLanguages", "getLocale"]},
-		"LanguageIntlUtils": {"props": ["getLanguages", "getSystemLocale", "intl"]},
+		"LanguageIntlUtils": {"props": ["formatToPlainString"]},
 		"LoginUtils": {"props": ["login", "logout"]},
 		"MediaEngineUtils": {"props": ["setOutputDevice", "setInputDevice"]},
 		"MemberDisplayUtils": {"strings": [".getGuildMemberProfile", ".getUser("], "exported": false, "value": "exports", "map": {
@@ -191,7 +191,8 @@
 		"MessageToolbarUtils": {"props": ["useMessageMenu"]},
 		"MessageUtils": {"props": ["receiveMessage", "editMessage"]},
 		"ModalUtils": {"strings": [".modalKey", "onCloseCallback", "Layer:"], "exported": false, "value": "exports", "map": {
-			"openModal": ["backdropStyle:", "modalKey:", "Layer:"]
+			"openModal": ["backdropStyle:", "modalKey:", "Layer:"],
+			"closeAll": ["[e];if(null!=t)for(let n of t)"]
 		}},
 		"NitroUtils": {"props": ["canUseIncreasedMessageLength", "canUsePremiumGuildMemberProfile"]},
 		"NotificationSettingsUtils": {"props": ["setDesktopType", "setTTSType"]},
@@ -279,9 +280,9 @@
 		"AvatarConstants": {"strings": ["\"SIZE_20\"", "\"SIZE_32\""], "exported": false, "value": "exports", "map": {
 			"AvatarSizes": ["\"SIZE_20\"", "\"SIZE_32\""]
 		}},
-		"Avatars": {"props": ["AnimatedAvatar", "Avatar"], "exported": false, "value": "exports", "map": {
-			"AnimatedAvatar": ["AnimatedAvatar"],
-			"Avatar": ["Avatar"]
+		"Avatars": {"strings": [".UNKNOWN", "foreignObject", "fromIsMobile"], "exported": false, "value": "exports", "map": {
+			"AnimatedAvatar": ["{\"compare\":null}"],
+			"Avatar": ["statusColor", ".UNKNOWN"]
 		}},
 		"Badges": {"strings": ["disableColor", "baseShapeRound", "textBadge"], "exported": false, "value": "exports", "map": {
 			"BadgeShapes": ["baseShapeRoundRight", "baseShapeRoundLeft"],
@@ -313,8 +314,8 @@
 		"Heading": {"strings": ["data-excessive", ".defaultColor"], "funcStrings": ["defaultColor"]},
 		"HeaderBarComponents": {"strings": ["isAuthenticated", ".HEADER_BAR"]},
 		"Image": {"strings": ["containerRef", "zoomable", "LOADING"]},
-		"ImageModal": {"strings": ["MODAL_CAROUSEL_NEXT", "shouldHideMediaOptions"]},
-		"ImageModalOuter": {"strings": ["MEDIA_VIEWER", "numMediaItem", "BackdropStyles"]},
+		"ImageModal": {"strings": ["MODAL_CAROUSEL_NEXT", "shouldHideMediaOptions", "SELECTED_ITEM_CHANGE"]},
+		"ImageModalOuter": {"strings": ["MEDIA_VIEWER", "numMediaItem", "LIGHTBOX"]},
 		"LayerContainerComponents": {"strings": ["layerContainerElement", "LayerProvider"], "exported": false, "value": "exports", "map": {
 			"createLayer": [".createContext"],
 			"LayerContainer": [".layerContainer", "missing parent"]
@@ -382,8 +383,9 @@
 		"UserSettingsCogContextMenu": "user-settings-cog"
 	},
 	"PatchModules": {
-		"Account": {"strings": ["handleOpenSettingsContextMenu", "shouldShowSpeakingWhileMutedTooltip", "renderSettingsGear"]},
-		"AccountPopout": {"strings": ["SIMPLIFIED_ACCOUNT_POPOUT", "dimissibleUpsellsEnabled"]},
+		"Account": {"strings": ["handleOpenSettingsContextMenu", "shouldShowSpeakingWhileMutedTooltip", "isCopiedStreakGodlike"]},
+		"AccountButtons": {"strings": ["handleOpenSettingsContextMenu", "shouldShowSpeakingWhileMutedTooltip", "isEligibleForPomelo"]},
+		"AccountPopout": {"strings": ["SIMPLIFIED_ACCOUNT_POPOUT", ".menus"]},
 		"AccountName": {"strings": ["accountProfilePopoutWrapper", ".avatarWrapper", "renderNameTag"]},
 		"AnalyticsContext": {"props": ["ObjectTypes", "Objects", "Pages", "Sections"]},
 		"AuditLogEntry": {"protos": ["renderRoleUpdate", "renderChangeDetails", "getActionTypeColor", "renderPermissionUpdate"]},
@@ -413,7 +415,7 @@
 		"ChannelsList": {"protos": ["isUnreadVisible", "renderBottomUnread", "getSectionRowsFromChannel"]},
 		"ChannelTextAreaButtons": {"strings": [".buttons", "\"emoji\"", "activeCommandOption"]},
 		"ChannelTextAreaContainer": {"strings": ["uploadPromptCharacterCount", "onSelectSticker", "handleAutocompleteVisibilityChange"], "noSearch": true},
-		"ChannelTextAreaCounter": {"strings": [".flairContainer", "CHARACTER_COUNT_CLOSE_TO_LIMIT"]},
+		"ChannelTextAreaCounter": {"strings": ["iconOnly", ".CHARACTER_COUNT"]},
 		"ChannelTextAreaEditor": {"strings": ["onHideAutocomplete", "onMaybeShowAutocomplete", "uploadPromptCharacterCount", "_focusBlurQueue"]},
 		"ChannelTextAreaForm": {"strings": ["renderApplicationCommandIcon", "handleTextareaChange", "handleSendMessage"]},
 		"ChannelThreadItem": {"strings": [".typeThread", ".modeUnread", ".GUILD_CHANNEL_LIST"]},
@@ -589,7 +591,7 @@
 		"UserSettingsAppearance": {"protos": ["renderTheme", "renderDisplayMode", "renderMessageGroupSpacingSlider"]},
 		"UserThemeContainer": {"strings": ["shouldTrackView", "\"VIEW\"", ".Provider"], "noSearch": true},
 		"VideoBackground": {"strings": ["backgroundSrc:", "pulseSpeakingIndicator:", ".avatarWrapper"]},
-		"VoiceUser": {"protos": ["renderPrioritySpeaker", "renderIcons", "renderAvatar"]},
+		"VoiceUser": {"strings": [".voiceUser", ".content", "userNameClassName"]},
 		"VoiceUsers": {"strings": ["hidePreview", "previewIsOpen", ".MOVE_MEMBERS"]}
 	},
 	"ModuleUtilsConfig": {
@@ -1084,6 +1086,8 @@
 			"bdIcon": "bd-icon",
 			"bdLink": "bd-link",
 			"bdLinks": "bd-links",
+			"bdModal": "bd-modal",
+			"bdModalContent": "bd-modal-content",
 			"bdMeta": "bd-meta",
 			"bdMinimalMode": "bd-minimal",
 			"bdName": "bd-name",
@@ -1178,7 +1182,8 @@
 			"operations": "operations_3V47CY",
 			"previous": "previous_xsNq6B",
 			"sibling": "sibling_6vI7Pu",
-			"switchIcon": "switchIcon_QY6cR4"
+			"switchIcon": "switchIcon_QY6cR4",
+			"viewer": "viewer_ds98Ts"
 		},
 		"LastMessageDate": {
 			"icon": "icon_ocEw13"
@@ -1208,14 +1213,6 @@
 			"recentPlaceholder": "placeholder_Uff-gH",
 			"unpinButton": "unpinButton_z3-UVO",
 			"unpinIcon": "unpinIcon_79ZnEr"
-		},
-		"PluginRepo": {
-			"failNotice": "failNotice_OtHUGb",
-			"loadingIcon": "loadingIcon_dB3qSe",
-			"loadingTooltip": "loadingTooltip_SzsTEU",
-			"newEntriesNotice": "newEntriesNotice_qvvpPx",
-			"outdatedNotice": "outdatedNotice_9Q9gJv",
-			"repoNotice": "repoNotice_P5ss6R"
 		},
 		"ReadAllNotificationsButton": {
 			"button": "button_Jt-tIg",
@@ -1294,21 +1291,6 @@
 			"ownerIcon": "owner_FfFh3B",
 			"threadCreatorIcon": "threadCreator_lp5sXo"
 		},
-		"ThemeRepo": {
-			"dragBar": "dragBar_4FsRaa",
-			"dragCorner": "dragCorner_PgJJk2",
-			"dragInterface": "dragInterface_OT5s2A",
-			"failNotice": "failNotice_pZAzjZ",
-			"loadingIcon": "loadingIcon_h7OqHY",
-			"loadingTooltip": "loadingTooltip_YszEmb",
-			"moveBar": "moveBar_lZ555a",
-			"newEntriesNotice": "newEntriesNotice_abF6e1",
-			"preview": "preview_7Gh5tS",
-			"previewFullscreen": "fullscreen_h78TsW",
-			"previewMoving": "moving_Wa22fA",
-			"outdatedNotice": "outdatedNotice_fw8ams",
-			"repoNotice": "repoNotice_TV3RFr"
-		},
 		"ThemeSettings": {
 			"card": "card_h4Rts2",
 			"cardName": "card_jdf7Rs",
@@ -1341,6 +1323,8 @@
 			"_": "",
 			"emoji": "emoji",
 			"carouselModal": "carouselModal__8a837",
+			"enableForcedColors": "enable-forced-colors",
+			"highlight": "highlight",
 			"highlight": "highlight",
 			"hueCursor": "hue_cursor",
 			"hueHorizontal": "hue-horizontal",
@@ -1350,7 +1334,7 @@
 			"mentionWrapper": "wrapper_f61d60",
 			"messagesLoadingWrapper": "wrapper_ba0ffb",
 			"nameContainer": "container__91a9d",
-			"nameContainerNameContainer": "container_e45859",
+			"nameContainerNameContainer": "container__13cf1 text__13cf1",
 			"saturationBlack": "saturation-black",
 			"saturationColor": "saturation-color",
 			"saturationCursor": "saturation-cursor",
@@ -1393,6 +1377,7 @@
 	"LazyloadedClassModules": {
 		"AuthBoxBackgroundCharacter": "bdd070",
 		"AuthBoxBackgroundSplash": "f421fb",
+		"ColorPickerInner": "_889ee",
 		"CustomStatusModal": "_9b8f6",
 		"ForumPage": "f369db",
 		"GuildInviteModal": "_67dba",
@@ -1404,6 +1389,7 @@
 		"HotKeyRecorderBase": "f89b2c",
 		"HoverCardRemoveButton": "e18686",
 		"ImageModalInner": "_1bcc7",
+		"ModalMiniContent": "_487be",
 		"NoteTextarea": "_9daae",
 		"PollModal": "_01c8c",
 		"SelectFilterPopout": "_5906b",
@@ -1630,6 +1616,7 @@
 		"Slider": {"props": ["slider", "grabber"]},
 		"Spinner": {"props": ["spinner", "chasingDots"]},
 		"Spoiler": {"props": ["spoilerContainer", "hidden"]},
+		"Stack": {"props": ["stack"], "length": 1},
 		"Switch": {"props": ["container", "slider", "input"]},
 		"Table": {"props": ["stickyHeader", "sortIcon"]},
 		"Text": {"props": ["defaultColor", "defaultMarginh1"]},
@@ -1676,6 +1663,8 @@
 		"_bdguildseparator": ["BD", "bdGuildSeparator"],
 		"_bdguildunread": ["BD", "bdGuildUnread"],
 		"_bdguildvideo": ["BD", "bdGuildVideo"],
+		"_bdmodal": ["BD", "bdModal"],
+		"_bdmodalcontent": ["BD", "bdModalContent"],
 		"_bdminimalmode": ["BD", "bdMinimalMode"],
 		"_bdpillselected": ["BD", "bdPillSelected"],
 		"_bdpillunread": ["BD", "bdPillUnread"],
@@ -1734,6 +1723,7 @@
 		"_imageutilitiesprevious": ["ImageUtilities", "previous"],
 		"_imageutilitiessibling": ["ImageUtilities", "sibling"],
 		"_imageutilitiesswitchicon": ["ImageUtilities", "switchIcon"],
+		"_imageutilitiesviewer": ["ImageUtilities", "viewer"],
 		"_lastmessagedateicon": ["LastMessageDate", "icon"],
 		"_oldtitlebarenabled": ["OldTitleBar", "oldTitleBarEnabled"],
 		"_oldtitlebarsettingstoolbar": ["OldTitleBar", "settingsToolbar"],
@@ -1755,12 +1745,6 @@
 		"_pindmsrecentplaceholder": ["PinDMs", "recentPlaceholder"],
 		"_pindmsunpinbutton": ["PinDMs", "unpinButton"],
 		"_pindmsunpinicon": ["PinDMs", "unpinIcon"],
-		"_pluginrepofailnotice": ["PluginRepo", "failNotice"],
-		"_pluginrepoloadingicon": ["PluginRepo", "loadingIcon"],
-		"_pluginrepoloadingtooltip": ["PluginRepo", "loadingTooltip"],
-		"_pluginreponewentriesnotice": ["PluginRepo", "newEntriesNotice"],
-		"_pluginreponotice": ["PluginRepo", "repoNotice"],
-		"_pluginrepooutdatednotice": ["PluginRepo", "outdatedNotice"],
 		"_readallnotificationsbuttonbutton": ["ReadAllNotificationsButton", "button"],
 		"_readallnotificationsbuttonframe": ["ReadAllNotificationsButton", "frame"],
 		"_readallnotificationsbuttoninner": ["ReadAllNotificationsButton", "innerFrame"],
@@ -1820,19 +1804,6 @@
 		"_stafftagmanagementicon": ["StaffTag", "managementIcon"],
 		"_stafftagownericon": ["StaffTag", "ownerIcon"],
 		"_stafftagthreadcreatoricon": ["StaffTag", "threadCreatorIcon"],
-		"_themerepodragbar": ["ThemeRepo", "dragBar"],
-		"_themerepodragcorner": ["ThemeRepo", "dragCorner"],
-		"_themerepodraginterface": ["ThemeRepo", "dragInterface"],
-		"_themerepofailnotice": ["ThemeRepo", "failNotice"],
-		"_themerepoloadingicon": ["ThemeRepo", "loadingIcon"],
-		"_themerepoloadingtooltip": ["ThemeRepo", "loadingTooltip"],
-		"_themerepomovebar": ["ThemeRepo", "moveBar"],
-		"_themereponewentriesnotice": ["ThemeRepo", "newEntriesNotice"],
-		"_themereponotice": ["ThemeRepo", "repoNotice"],
-		"_themerepooutdatednotice": ["ThemeRepo", "outdatedNotice"],
-		"_themerepopreview": ["ThemeRepo", "preview"],
-		"_themerepopreviewfullscreen": ["ThemeRepo", "previewFullscreen"],
-		"_themerepopreviewmoving": ["ThemeRepo", "previewMoving"],
 		"_themesettingscard": ["ThemeSettings", "card"],
 		"_themesettingscardname": ["ThemeSettings", "cardName"],
 		"_themesettingsgrid": ["ThemeSettings", "grid"],
@@ -1899,6 +1870,7 @@
 		"accountinfobutton": ["AccountDetailsButtons", "button"],
 		"accountinfobuttondisabled": ["AccountDetailsButtons", "disabled"],
 		"accountinfobuttonenabled": ["AccountDetailsButtons", "enabled"],
+		"accountinfobuttons": ["AccountDetails", "buttons"],
 		"accountinfobuttonstrikethrough": ["AccountDetails", "strikethrough"],
 		"accountinfodetails": ["AccountDetails", "panelTitleContainer"],
 		"accountinfonametag": ["AccountDetails", "nameTag"],
@@ -2150,6 +2122,7 @@
 		"colorpickeralphacheckered": ["BDFDB", "colorPickerAlphaCheckered"],
 		"colorpickeralphacursor": ["BDFDB", "colorPickerAlphaCursor"],
 		"colorpickeralphahorizontal": ["BDFDB", "colorPickerAlphaHorizontal"],
+		"colorpickereyedropper": ["ColorPicker", "customColorPickerEyeDropper"],
 		"colorpickergradient": ["BDFDB", "colorPickerGradient"],
 		"colorpickergradientbutton": ["BDFDB", "colorPickerGradientButton"],
 		"colorpickergradientbuttonenabled": ["BDFDB", "colorPickerGradientButtonEnabled"],
@@ -2159,6 +2132,7 @@
 		"colorpickergradientcursorselected": ["BDFDB", "colorPickerGradientCursorSelected"],
 		"colorpickergradienthorizontal": ["BDFDB", "colorPickerGradientHorizontal"],
 		"colorpickerhexinput": ["ColorPicker", "customColorPickerInput"],
+		"colorpickerhexinputcontainer": ["ColorPicker", "customColorPickerInputContainer"],
 		"colorpickerhue": ["ColorPickerInner", "hue"],
 		"colorpickerhuecursor": ["NotFound", "hueCursor"],
 		"colorpickerhuehorizontal": ["NotFound", "hueHorizontal"],
@@ -2170,6 +2144,8 @@
 		"colorpickersaturationcolor": ["NotFound", "saturationColor"],
 		"colorpickersaturationcursor": ["NotFound", "saturationCursor"],
 		"colorpickersaturationwhite": ["NotFound", "saturationWhite"],
+		"colorpickersuggestedcolor": ["ColorPicker", "suggestedColor"],
+		"colorpickersuggestedcolors": ["ColorPicker", "suggestedColors"],
 		"colorpickerswatch": ["ColorPicker", "colorPickerSwatch"],
 		"colorpickerswatches": ["BDFDB", "colorPickerSwatches"],
 		"colorpickerswatchescontainer": ["ColorPicker", "container"],
@@ -2385,6 +2361,7 @@
 		"guildfolderexpandedbackgroundcollapsed": ["GuildFolder", "collapsed"],
 		"guildfolderexpandedbackgroundhover": ["GuildFolder", "hover"],
 		"guildfolderguildicon": ["GuildFolder", "guildIcon"],
+		"guildfoldericon": ["GuildFolder", "folderIcon"],
 		"guildfoldericonwrapper": ["GuildFolder", "folderIconWrapper"],
 		"guildfoldericonwrapperclosed": ["GuildFolder", "closedFolderIconWrapper"],
 		"guildfoldericonwrapperexpanded": ["GuildFolder", "expandedFolderIconWrapper"],
@@ -2443,6 +2420,7 @@
 		"guildsvg": ["Guild", "svg"],
 		"guildswrapper": ["GuildsWrapper", "wrapper"],
 		"guildswrapperhidden": ["GuildsWrapper", "hidden"],
+		"guildswrapperitems": ["GuildsWrapper", "itemsContainer"],
 		"guildswrapperunreadmentionsbar": ["GuildsWrapper", "unreadMentionsBar"],
 		"guildswrapperunreadmentionsbarbottom": ["GuildsWrapper", "unreadMentionsIndicatorBottom"],
 		"guildswrapperunreadmentionsbartop": ["GuildsWrapper", "unreadMentionsIndicatorTop"],
@@ -3143,6 +3121,7 @@
 		"spoilerhidden": ["Spoiler", "hidden"],
 		"spoilertext": ["Spoiler", "spoilerContent"],
 		"spoilerwarning": ["Spoiler", "spoilerWarning"],
+		"stack": ["Stack", "stack"],
 		"strikethrough": ["TextStyle", "strikethrough"],
 		"stopanimations": ["NotFound", "stopAnimations"],
 		"subtext": ["NotFound", "subtext"],
@@ -3170,6 +3149,7 @@
 		"tableheadersorticon": ["Table", "sortIcon"],
 		"tablerow": ["Table", "row"],
 		"tablestickyheader": ["Table", "stickyHeader"],
+		"tabularnumbers": ["Text2", "tabularNumbers"],
 		"textarea": ["ChannelTextArea", "textArea"],
 		"textareaattachbutton": ["ChannelTextAreaAttachButton", "attachButton"],
 		"textareaattachbuttoninner": ["ChannelTextAreaAttachButton", "attachButtonInner"],
@@ -3180,6 +3160,7 @@
 		"textareabuttonpulse": ["ChannelTextAreaButton", "pulseButton"],
 		"textareabuttonwrapper": ["ChannelTextAreaButton", "buttonWrapper"],
 		"textareacharcounter": ["ChannelTextAreaCharCounter", "characterCount"],
+		"textareacharcounterinner": ["ChannelTextAreaCharCounter", "flairContainer"],
 		"textareacharcounterupsell": ["ChannelTextAreaCharCounter", "upsell"],
 		"textareadisabled": ["ChannelTextArea", "textAreaDisabled"],
 		"textareafontsize12padding": ["ChannelTextArea", "fontSize12Padding"],
@@ -3206,6 +3187,7 @@
 		"textscroller": ["BDFDB", "textScroller"],
 		"themecustombackground": ["NotFound", "themeCustomBackground"],
 		"themedark": ["NotFound", "themeDark"],
+		"themeenableforcedcolors": ["NotFound", "enableForcedColors"],
 		"themelight": ["NotFound", "themeLight"],
 		"themeundefined": ["NotFound", "themeUndefined"],
 		"threadcard": ["ThreadCard", "container"],

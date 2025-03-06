@@ -2,7 +2,7 @@
  * @name BDFDB
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 3.9.2
+ * @version 4.0.0
  * @description Required Library for DevilBro's Plugins
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -1206,7 +1206,7 @@ module.exports = (_ => {
 					};
 					
 					if (InternalData) loadLibrary();
-					else BdApi.alert("Error", "Could not initiate BDFDB Library Plugin. Check your Internet Connection and make sure GitHub isn't blocked by your Network or try disabling your VPN/Proxy.");
+					else BdApi.UI.alert("Error", "Could not initiate BDFDB Library Plugin. Check your Internet Connection and make sure GitHub isn't blocked by your Network or try disabling your VPN/Proxy.");
 				};
 				
 				const backupObj = getBackup(cssFileName, cssFilePath);
@@ -1281,7 +1281,8 @@ module.exports = (_ => {
 					return (req.m[id] || "").toString();
 				};
 				
-				Internal.lazyLoadModuleImports = function (moduleString) {
+				BDFDB.ModuleUtils = {};
+				BDFDB.ModuleUtils.lazyLoadModuleImports = function (moduleString) {
 					return new Promise(callback => {
 						if (typeof moduleString !== "string") moduleString = Internal.getModuleString(moduleString);
 						if (!moduleString || typeof moduleString !== "string") {
@@ -1290,7 +1291,7 @@ module.exports = (_ => {
 						}
 						let run = true, imports = [], menuIndexes = [];
 						while (run) {
-							const [matchString, promiseMatch, menuRequest] = moduleString.match(/return .*?(Promise\.all\(.+?\))\.then\((.+?)\)\)/) ?? [];
+							const [matchString, promiseMatch, menuRequest] = moduleString.match(/await .+?(\(.+?\))\.then\(.{1}\.bind\((.+?)\)\)/) ?? [];
 							if (!promiseMatch) run = false;
 							else {
 								imports = imports.concat(promiseMatch.match(/\d+/g)?.map(e => Number(e)));
@@ -1307,43 +1308,45 @@ module.exports = (_ => {
 					});
 				};
 				
-				BDFDB.ModuleUtils = {};
 				BDFDB.ModuleUtils.find = function (filter, config = {}) {
 					let defaultExport = typeof config.defaultExport != "boolean" ? true : config.defaultExport;
 					let onlySearchUnloaded = typeof config.onlySearchUnloaded != "boolean" ? false : config.onlySearchUnloaded;
 					let all = typeof config.all != "boolean" ? false : config.all;
 					const req = Internal.getWebModuleReq();
 					const found = [];
+					const isSearchable = (m, checkObject) => {
+						return m && (checkObject && typeof m == "object" || typeof m == "function") && !m.constructor.toLocaleString().startsWith("function DOMTokenList()") && typeof m.toLocaleString == "function" && m.toLocaleString().indexOf("IntlMessagesProxy") == -1;
+					};
 					if (!onlySearchUnloaded) for (let i in req.c) if (req.c.hasOwnProperty(i) && req.c[i].exports != window) {
 						let m = req.c[i].exports, r = null;
-						if (m && (typeof m == "object" || typeof m == "function")) {
+						if (isSearchable(m, true)) {
 							if (!!(r = filter(m))) {
 								if (all) found.push(defaultExport ? r : req.c[i]);
 								else return defaultExport ? r : req.c[i];
 							}
 							else if (Object.keys(m).length < 400) for (let key of Object.keys(m)) try {
-								if (m[key] && !!(r = filter(m[key]))) {
+								if (m[key] && isSearchable(m[key], true) && !!(r = filter(m[key]))) {
 									if (all) found.push(defaultExport ? r : req.c[i]);
 									else return defaultExport ? r : req.c[i];
 								}
 							} catch (err) {}
 						}
-						if (config.moduleName && m && m[config.moduleName] && (typeof m[config.moduleName] == "object" || typeof m[config.moduleName] == "function")) {
+						if (config.moduleName && isSearchable(m, true) && isSearchable(m[config.moduleName], true)) {
 							if (!!(r = filter(m[config.moduleName]))) {
 								if (all) found.push(defaultExport ? r : req.c[i]);
 								else return defaultExport ? r : req.c[i];
 							}
-							else if (m[config.moduleName].type && (typeof m[config.moduleName].type == "object" || typeof m[config.moduleName].type == "function") && !!(r = filter(m[config.moduleName].type))) {
+							else if (m[config.moduleName].type && isSearchable(m[config.moduleName].type, true) && !!(r = filter(m[config.moduleName].type))) {
 								if (all) found.push(defaultExport ? r : req.c[i]);
 								else return defaultExport ? r : req.c[i];
 							}
 						}
-						if (m && m.__esModule && m.default && (typeof m.default == "object" || typeof m.default == "function")) {
+						if (m && m.__esModule && isSearchable(m.default, true)) {
 							if (!!(r = filter(m.default))) {
 								if (all) found.push(defaultExport ? r : req.c[i]);
 								else return defaultExport ? r : req.c[i];
 							}
-							else if (m.default.type && (typeof m.default.type == "object" || typeof m.default.type == "function") && !!(r = filter(m.default.type))) {
+							else if (isSearchable(m.default.type, true) && !!(r = filter(m.default.type))) {
 								if (all) found.push(defaultExport ? r : req.c[i]);
 								else return defaultExport ? r : req.c[i];
 							}
@@ -1351,7 +1354,7 @@ module.exports = (_ => {
 					}
 					for (let i in req.m) if (req.m.hasOwnProperty(i)) {
 						let m = req.m[i];
-						if (m && typeof m == "function") {
+						if (m && isSearchable(m)) {
 							if (req.c[i] && !onlySearchUnloaded && filter(m)) {
 								if (all) found.push(defaultExport ? req.c[i].exports : req.c[i]);
 								else return defaultExport ? req.c[i].exports : req.c[i];
@@ -2002,7 +2005,7 @@ module.exports = (_ => {
 					return notice;
 				};
 				BDFDB.NotificationUtils.alert = function (header, body) {
-					if (typeof header == "string" && typeof header == "string" && BdApi && typeof BdApi.alert == "function") BdApi.alert(header, body);
+					if (typeof header == "string" && typeof header == "string" && BdApi && typeof BdApi.UI.alert == "function") BdApi.UI.alert(header, body);
 				};
 
 				var Tooltips = [];
@@ -3059,7 +3062,7 @@ module.exports = (_ => {
 					if (!moduleFindData) return;
 					let menu = BDFDB.ModuleUtils.findByString(moduleFindData, {noWarnings: true});
 					if (menu) Internal.LibraryModules.ContextMenuUtils.openContextMenu(e, e2 => BDFDB.ReactUtils.createElement(menu.default || menu, Object.assign({}, e2, {message, channel})));
-					else Internal.lazyLoadModuleImports(BDFDB.ModuleUtils.findByString(slim ? InternalData.PatchModules.SearchResult && InternalData.PatchModules.SearchResult.strings : InternalData.LibraryModules.MessageComponentUtils && InternalData.LibraryModules.MessageComponentUtils.strings)).then(_ => {
+					else BDFDB.ModuleUtils.lazyLoadModuleImports(BDFDB.ModuleUtils.findByString(slim ? InternalData.PatchModules.SearchResult && InternalData.PatchModules.SearchResult.strings : InternalData.LibraryModules.MessageComponentUtils && InternalData.LibraryModules.MessageComponentUtils.strings)).then(_ => {
 						menu = BDFDB.ModuleUtils.findByString(moduleFindData);
 						if (menu) Internal.LibraryModules.ContextMenuUtils.openContextMenu(e, e2 => BDFDB.ReactUtils.createElement(menu.default || menu, Object.assign({}, e2, {message, channel})));
 					});
@@ -3135,7 +3138,7 @@ module.exports = (_ => {
 					if (!moduleFindData) return;
 					let menu = BDFDB.ModuleUtils.findByString(moduleFindData, {noWarnings: true});
 					if (menu) Internal.LibraryModules.ContextMenuUtils.openContextMenu(e, e2 => BDFDB.ReactUtils.createElement(menu.default || menu, Object.assign({}, e2, {user, guildId, channelId})));
-					else Internal.lazyLoadModuleImports(BDFDB.ModuleUtils.findByString(channelId ? InternalData.LibraryModules.UserPopoutUtils && InternalData.LibraryModules.UserPopoutUtils.strings : InternalData.PatchModules.ParticipantsForSelectedParticipant && InternalData.PatchModules.ParticipantsForSelectedParticipant.strings)).then(_ => {
+					else BDFDB.ModuleUtils.lazyLoadModuleImports(BDFDB.ModuleUtils.findByString(channelId ? InternalData.LibraryModules.UserPopoutUtils && InternalData.LibraryModules.UserPopoutUtils.strings : InternalData.PatchModules.ParticipantsForSelectedParticipant && InternalData.PatchModules.ParticipantsForSelectedParticipant.strings)).then(_ => {
 						menu = BDFDB.ModuleUtils.findByString(moduleFindData);
 						if (menu) Internal.LibraryModules.ContextMenuUtils.openContextMenu(e, e2 => BDFDB.ReactUtils.createElement(menu.default || menu, Object.assign({}, e2, {user, guildId, channelId})));
 					});
@@ -3167,7 +3170,7 @@ module.exports = (_ => {
 					if (!moduleFindData) return;
 					let menu = BDFDB.ModuleUtils.findByString(moduleFindData, {noWarnings: true});
 					if (menu) Internal.LibraryModules.ContextMenuUtils.openContextMenu(e, e2 => BDFDB.ReactUtils.createElement(menu.default || menu, Object.assign({}, e2, {guild})));
-					else Internal.lazyLoadModuleImports(BDFDB.ModuleUtils.findByString(InternalData.PatchModules.GuildSidebar && InternalData.PatchModules.GuildSidebar.strings)).then(_ => {
+					else BDFDB.ModuleUtils.lazyLoadModuleImports(BDFDB.ModuleUtils.findByString(InternalData.PatchModules.GuildSidebar && InternalData.PatchModules.GuildSidebar.strings)).then(_ => {
 						menu = BDFDB.ModuleUtils.findByString(moduleFindData);
 						if (menu) Internal.LibraryModules.ContextMenuUtils.openContextMenu(e, e2 => BDFDB.ReactUtils.createElement(menu.default || menu, Object.assign({}, e2, {guild})));
 					});
@@ -3974,7 +3977,7 @@ module.exports = (_ => {
 						let name = plugin.name || (typeof plugin.getName == "function" ? plugin.getName() : null);
 						name = typeof name == "string" ? name : null;
 						let oldTransitionState = 0;
-						!Internal.LibraryModules.ModalUtils ? BdApi.alert(BDFDB.ReactUtils.createElement("div", {
+						!Internal.LibraryModules.ModalUtils ? BdApi.UI.alert(BDFDB.ReactUtils.createElement("div", {
 								style: {"display": "flex", "flex-direction": "column"},
 								children: [
 									config.header,
@@ -4556,7 +4559,7 @@ module.exports = (_ => {
 				});
 				
 				const LanguageStringsObj = Internal.LibraryModules.LanguageStore && Internal.LibraryModules.LanguageStore.Messages || Internal.LibraryModules.LanguageStore || {};
-				const LanguageStringFormattersObj = (BDFDB.ModuleUtils.findByString("createLoader:", "getBinds", InternalData.LanguageStringHashes.DISCORD) || {}).Z;
+				const LanguageStringFormattersObj = (BDFDB.ModuleUtils.findByString("createLoader:", "de:") || {}).Z;
 				const LibraryStrings = Object.assign({}, InternalData.LibraryStrings);
 				BDFDB.LanguageUtils = {};
 				BDFDB.LanguageUtils.languages = Object.assign({}, InternalData.Languages);
@@ -4603,7 +4606,7 @@ module.exports = (_ => {
 				};
 				BDFDB.LanguageUtils.LanguageStringsFormat = function (item, ...values) {
 					if (item) {
-						let formatter = Internal.LibraryModules.LanguageIntlUtils && Internal.LibraryModules.LanguageIntlUtils.intl && Internal.LibraryModules.LanguageIntlUtils.intl.format;
+						let formatter = Internal.LibraryModules.LanguageIntlUtils && Internal.LibraryModules.LanguageIntlUtils.formatToPlainString;
 						let stringObj = LanguageStringsObj[item] || LanguageStringsObj[InternalData.LanguageStringHashes[item]];
 						if (stringObj && typeof stringObj == "object" && typeof stringObj.format == "function" || BDFDB.ArrayUtils.is(stringObj)) {
 							let i = 0, returnvalue, formatVars = {};
@@ -4611,10 +4614,11 @@ module.exports = (_ => {
 								i++;
 								try {returnvalue = formatter && BDFDB.ArrayUtils.is(stringObj) ? formatter(LanguageStringFormattersObj[InternalData.LanguageStringHashes[item]], formatVars) : stringObj.format(formatVars, false);}
 								catch (err) {
+									window.temp1 = err;
 									returnvalue = null;
 									let value = values.shift();
 									value = value != null ? (value === 0 ? "0" : value) : "undefined";
-									let valueName = err.toString().split("for: ")[1] || err.toString().split("\"")[1];
+									let valueName = (err.toString().split("for variable '")[1] || "").split("'")[0];
 									formatVars[valueName] = valueName.endsWith("Hook") ? (_ => value) : value;
 									if (stringObj.intMessage) {
 										try {for (let hook of stringObj.intMessage.format(formatVars).match(/\([^\(\)]+\)/gi)) formatVars[hook.replace(/[\(\)]/g, "")] = n => n;}
@@ -6103,7 +6107,7 @@ module.exports = (_ => {
 							}),
 							wrap: false,
 							animation: Internal.LibraryComponents.PopoutContainer.Animation.NONE,
-							position: Internal.LibraryComponents.PopoutContainer.Positions.TOP,
+							position: this.props.position || Internal.LibraryComponents.PopoutContainer.Positions.TOP,
 							align: Internal.LibraryComponents.PopoutContainer.Align.LEFT,
 							renderPopout: instance => {
 								this.close = instance.close;
@@ -7697,6 +7701,7 @@ module.exports = (_ => {
 				CustomComponents.TextInput = reactInitialized && class BDFDB_TextInput extends Internal.LibraryModules.React.Component {
 					handleChange(e, e2) {
 						let value = e = BDFDB.ObjectUtils.is(e) ? e.currentTarget.value : e;
+						if (this.props.type == "number") value = parseInt(value);
 						this.props.value = this.props.valuePrefix && !value.startsWith(this.props.valuePrefix) ? (this.props.valuePrefix + value) : value;
 						this.props.file = e2 = BDFDB.ObjectUtils.is(e2) ? e2.currentTarget.value : e2;
 						if (typeof this.props.onChange == "function") this.props.onChange(this.props.type == "file" ? this.props.file : this.props.value, this);

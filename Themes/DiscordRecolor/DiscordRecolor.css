@@ -48,7 +48,13 @@
 
 .theme-light:not(.custom-profile-theme),
 .theme-dark:not(.custom-profile-theme),
-.theme-amoled:not(.custom-profile-theme) {
+.theme-amoled:not(.custom-profile-theme),
+.visual-refresh.theme-light:not(.custom-profile-theme),
+.visual-refresh.theme-dark:not(.custom-profile-theme),
+.visual-refresh.theme-amoled:not(.custom-profile-theme),
+.visual-refresh .theme-light:not(.custom-profile-theme),
+.visual-refresh .theme-dark:not(.custom-profile-theme),
+.visual-refresh .theme-amoled:not(.custom-profile-theme) {
 	--text-positive: rgb(var(--successcolor_v));
 	--text-warning: rgb(var(--warningcolor_v));
 	--text-danger: rgb(var(--dangercolor_v));
@@ -159,10 +165,31 @@
 	
 	--bg-backdrop: rgba(0 0,0, .7);
 	--bg-backdrop-no-opacity: rgb(0,0,0);
+	--bg-mod-faint: rgba(var(--backgroundaccent_v), .2);
+	--bg-mod-subtle: rgba(var(--backgroundaccent_v), .3);
+	--bg-mod-normal: rgba(var(--backgroundaccent_v), .4);
+	--bg-mod-strong: rgba(var(--backgroundaccent_v), .5);
 	--bg-base-primary: rgb(var(--backgroundprimary_v));
 	--bg-base-secondary: rgb(var(--backgroundsecondary_v));
 	--bg-base-tertiary: rgb(var(--backgroundtertiary_v));
 	--bg-surface-raised: rgb(var(--backgroundprimary_v));
+	
+	--background-mod-faint: rgba(var(--backgroundaccent_v), .2);
+	--background-mod-subtle: rgba(var(--backgroundaccent_v), .3);
+	--background-mod-normal: rgba(var(--backgroundaccent_v), .4);
+	--background-mod-strong: rgba(var(--backgroundaccent_v), .5);
+	--background-base-low: rgb(var(--backgroundprimary_v));
+	--background-base-lower: rgb(var(--backgroundsecondary_v));
+	--background-base-lowest: rgb(var(--backgroundsecondaryalt_v));
+	--background-surface-highest: rgb(var(--backgroundaccent_v));
+	--background-surface-higher: rgb(var(--backgroundprimary_v));
+	--background-surface-high: rgb(var(--backgroundprimary_v));
+	--chat-background-default: rgb(var(--backgroundprimary_v));
+	
+	--app-border-frame: transparent;
+	--border-faint: rgba(var(--backgroundaccent_v), .2);
+	--border-subtle: rgba(var(--backgroundaccent_v), .4);
+	--border-strong: rgba(var(--backgroundaccent_v), .6);
 	
 	--background-modifier-hover: rgba(var(--backgroundaccent_v), .3);
 	--background-modifier-active: rgba(var(--backgroundaccent_v), .4);
@@ -230,6 +257,7 @@
 	--channel-text-area-placeholder: rgb(var(--textdarker_v));
 	
 	--input-background: rgb(var(--backgroundtertiary_v));
+	--input-border: rgb(var(--backgroundsecondary_v));
 	
 	--activity-card-background: rgb(var(--backgroundtertiary_v));
 	
@@ -691,6 +719,15 @@ html .iconBadge__0c126 {
 #app-mount .item__001a7[aria-checked=false]:hover .radioBar__001a7[style*="--radio-bar-accent-color"] {
 	background: var(--radio-bar-accent-color) linear-gradient(to right, rgba(255, 255, 255, .2), rgba(255, 255, 255, .2));
 }
+#app-mount .radioBar__001a7[style*="--radio-bar-accent-color"] .refreshIconStroke__001a7 {
+	stroke: #fff;
+}
+#app-mount .radioBar__001a7[style*="--radio-bar-accent-color"] .radioIndicatorChecked__001a7 .refreshIcon__001a7 {
+	fill: var(--radio-bar-accent-color);
+}
+#app-mount .radioBar__001a7[style*="--radio-bar-accent-color"] .radioIndicatorChecked__001a7 .refreshIconFill__001a7 {
+	fill: #fff;
+}
 
 .lookFilled__3f413.select__3f413 {
 	background-color: var(--deprecated-text-input-bg);
@@ -803,9 +840,12 @@ html .iconBadge__0c126 {
 	overflow: hidden;
 }
 
+#app-mount .top_b3f026 .item_b3f026.selected_b3f026 {
+	color: var(--text-primary);
+}
 .side_b3f026 .themed_b3f026.selected_b3f026.item_b3f026:hover:not(.disabled_b3f026),
 .topPill_b3f026 .themed_b3f026.selected_b3f026.item_b3f026:hover:not(.disabled_b3f026) {
-	background-color: var(--background-modifier-selected);
+	background-color: var(--button-secondary-background);
 }
 
 #app-mount .customColorPicker_bbc020 {
@@ -1169,10 +1209,6 @@ img[src='/assets/387a7c504c96b992872d.svg'] {
 	box-shadow: var(--elevation-low);
 }
 
-#app-mount .children__9293f::after {
-	background: linear-gradient(90deg, transparent 0,var(--background-primary));
-}
-
 #app-mount .back__8b3a3 {
 	color: var(--interactive-normal);
 }
@@ -1434,10 +1470,6 @@ img[src='/assets/387a7c504c96b992872d.svg'] {
 }
 
 /* ----		4.3.		TEXTAREA					---- */
-
-#app-mount .form_f75fb0::before {
-	background: linear-gradient(180deg, transparent 0, var(--background-primary));
-}
 
 #app-mount .error_b82429 {
 	color: #f36c6c;
@@ -3124,6 +3156,11 @@ img[src='/assets/387a7c504c96b992872d.svg'] {
 	color: var(--interactive-active);
 }
 
+#app-mount .inspector_aeaaeb,
+#app-mount .wrapper__4e6ce {
+	background: var(--background-surface-high);
+}
+
 #app-mount .focused_bad108,
 #app-mount .result__2dc39:hover {
 	box-shadow: 0 11px 22px 1px rgba(4,4,5, .3);
@@ -4017,10 +4054,10 @@ html:only-child > head + body > div#app-mount.appMount__51fd7 > div.typeWindows_
 	opacity: 1 !important;
 }
 
-html:only-child > head + body div.app_a3002d > div.app__160d8 > div.layers__960e4.layers__160d8 > div.layer__960e4.baseLayer__960e4 + div.layer__960e4 > div.standardSidebarView__23e6b > div.sidebarRegion__23e6b > div.sidebarRegionScroller__23e6b.thin__99f8c.scrollerBase__99f8c.fade__99f8c > nav.sidebar__23e6b > div.side_b3f026 > div.info__2debe {
+html:only-child > head + body div.app_a3002d > div.app__160d8 > div.layers__960e4.layers__160d8 > div.layer__960e4.baseLayer__960e4 + div.layer__960e4 > div.standardSidebarView__23e6b > div.sidebarRegion__23e6b > div.sidebarRegionScroller__23e6b.thin_d125d2.scrollerBase_d125d2.fade_d125d2 > nav.sidebar__23e6b > div.side_b3f026 div.info__2debe {
 	position: relative !important;
 }
-html:only-child > head + body div.app_a3002d > div.app__160d8 > div.layers__960e4.layers__160d8 > div.layer__960e4.baseLayer__960e4 + div.layer__960e4 > div.standardSidebarView__23e6b > div.sidebarRegion__23e6b > div.sidebarRegionScroller__23e6b.thin__99f8c.scrollerBase__99f8c.fade__99f8c > nav.sidebar__23e6b > div.side_b3f026 > div.info__2debe::after {
+html:only-child > head + body div.app_a3002d > div.app__160d8 > div.layers__960e4.layers__160d8 > div.layer__960e4.baseLayer__960e4 + div.layer__960e4 > div.standardSidebarView__23e6b > div.sidebarRegion__23e6b > div.sidebarRegionScroller__23e6b.thin_d125d2.scrollerBase_d125d2.fade_d125d2 > nav.sidebar__23e6b > div.side_b3f026 div.info__2debe::after {
 	content: "DiscordRecolor by" !important;
 	font-size: 12px !important;
 	color: var(--text-muted) !important;
@@ -4039,7 +4076,7 @@ html:only-child > head + body div.app_a3002d > div.app__160d8 > div.layers__960e
 	transform: unset !important;
 	animation: unset !important;
 }
-html:only-child > head + body div.app_a3002d > div.app__160d8 > div.layers__960e4.layers__160d8 > div.layer__960e4.baseLayer__960e4 + div.layer__960e4 > div.standardSidebarView__23e6b > div.sidebarRegion__23e6b > div.sidebarRegionScroller__23e6b.thin__99f8c.scrollerBase__99f8c.fade__99f8c > nav.sidebar__23e6b > div.side_b3f026 > div.info__2debe::before {
+html:only-child > head + body div.app_a3002d > div.app__160d8 > div.layers__960e4.layers__160d8 > div.layer__960e4.baseLayer__960e4 + div.layer__960e4 > div.standardSidebarView__23e6b > div.sidebarRegion__23e6b > div.sidebarRegionScroller__23e6b.thin_d125d2.scrollerBase_d125d2.fade_d125d2 > nav.sidebar__23e6b > div.side_b3f026 div.info__2debe::before {
 	content: "DevilBro" !important;
 	font-size: 12px !important;
 	font-weight: 600 !important;
