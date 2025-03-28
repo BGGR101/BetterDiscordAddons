@@ -380,6 +380,15 @@
 	fill: rgb(var(--accentcolor_v));
 }
 
+.linkButton__972a0 {
+	overflow: hidden;
+	position: relative;
+}
+.marketingButtonBackgroundImage__4ed1a[src="https://cdn.discordapp.com/assets/content/ffea3b8093800be98cd8cd53695037449224b204ac4fb1e5e0d455688b81f1eb.png"] {
+	-webkit-mask: url("https://cdn.discordapp.com/assets/content/ffea3b8093800be98cd8cd53695037449224b204ac4fb1e5e0d455688b81f1eb.png") center/cover no-repeat;
+	background: rgb(var(--accentcolor_v));
+}
+
 
 /* ~~~~		3.		CHAT						~~~~ */
 
@@ -658,6 +667,9 @@
 
 /* ----		3.4.		MEMBERLIST					---- */
 
+.icon__8ac07 path[fill="#43a25a"] {
+	fill: var(--text-secondary);
+}
 .premiumIcon__5d473 {
 	color: rgb(var(--accentcolor2_v));
 }
@@ -1811,6 +1823,7 @@ a.metadataDownload_f316dd {
 .colorDefault_c1e9c4.focused_c1e9c4,
 .colorDefault_c1e9c4:active:not(.hideInteraction_c1e9c4) {
 	background-color: rgb(var(--accentcolor_v));
+	color: var(--header-primary);
 }
 .colorBrand_c1e9c4:not(.focused_c1e9c4):not(:active) .radioSelection_c1e9c4,
 .colorDefault_c1e9c4:not(.focused_c1e9c4):not(:active) .radioSelection_c1e9c4 {
@@ -1831,6 +1844,7 @@ a.metadataDownload_f316dd {
 .colorPremium_c1e9c4.focused_c1e9c4,
 .colorPremium_c1e9c4:active:not(.hideInteraction_c1e9c4) {
 	background-color: rgb(var(--accentcolor2_v));
+	color: var(--header-primary);
 }
 .colorPremium_c1e9c4:not(.focused_c1e9c4):not(:active) .radioSelection_c1e9c4 {
 	color: rgb(var(--accentcolor2_v));
@@ -1850,6 +1864,7 @@ a.metadataDownload_f316dd {
 .colorPremiumGradient_c1e9c4.focused_c1e9c4,
 .colorPremiumGradient_c1e9c4:active:not(.hideInteraction_c1e9c4) {
 	background: linear-gradient(90deg, rgb(var(--accentcolor2_v)), rgb(var(--accentcolor_v)));
+	color: var(--header-primary);
 }
 .colorPremiumGradient_c1e9c4:not(.focused_c1e9c4):not(:active) .radioSelection_c1e9c4 {
 	color: rgb(var(--accentcolor_v));
@@ -1867,6 +1882,7 @@ a.metadataDownload_f316dd {
 .colorDanger_c1e9c4.focused_c1e9c4,
 .colorDanger_c1e9c4:active:not(.hideInteraction_c1e9c4) {
 	background-color: var(--status-danger);
+	color: var(--header-primary);
 }
 .colorDanger_c1e9c4:not(.focused_c1e9c4):not(:active) .radioSelection_c1e9c4 {
 	color: var(--status-danger);
@@ -1884,6 +1900,7 @@ a.metadataDownload_f316dd {
 .colorSuccess_c1e9c4.focused_c1e9c4,
 .colorSuccess_c1e9c4:active:not(.hideInteraction_c1e9c4) {
 	background-color: var(--status-success);
+	color: var(--header-primary);
 }
 .colorSuccess_c1e9c4:not(.focused_c1e9c4):not(:active) .radioSelection_c1e9c4 {
 	color: var(--status-success);
@@ -1895,20 +1912,20 @@ a.metadataDownload_f316dd {
 	fill: var(--status-success);
 }
 
-.colorDefault_c1e9c4[id="account-status-picker--online"].focused_c1e9c4,
-.colorDefault_c1e9c4[id="account-status-picker--online"]:active:not(.hideInteraction_c1e9c4) {
+.colorDefault_c1e9c4[id="set-status-submenu-online"].focused_c1e9c4,
+.colorDefault_c1e9c4[id="set-status-submenu-online"]:active:not(.hideInteraction_c1e9c4) {
 	background-color: rgb(59,165,92);
 }
-.colorDefault_c1e9c4[id="account-status-picker--idle"].focused_c1e9c4,
-.colorDefault_c1e9c4[id="account-status-picker--idle"]:active:not(.hideInteraction_c1e9c4) {
+.colorDefault_c1e9c4[id="set-status-submenu-idle"].focused_c1e9c4,
+.colorDefault_c1e9c4[id="set-status-submenu-idle"]:active:not(.hideInteraction_c1e9c4) {
 	background-color: rgb(250,166,26);
 }
-.colorDefault_c1e9c4[id="account-status-picker--dnd"].focused_c1e9c4,
-.colorDefault_c1e9c4[id="account-status-picker--dnd"]:active:not(.hideInteraction_c1e9c4) {
+.colorDefault_c1e9c4[id="set-status-submenu-dnd"].focused_c1e9c4,
+.colorDefault_c1e9c4[id="set-status-submenu-dnd"]:active:not(.hideInteraction_c1e9c4) {
 	background-color: rgb(237,66,69);
 }
-.colorDefault_c1e9c4[id="account-status-picker--invisible"].focused_c1e9c4,
-.colorDefault_c1e9c4[id="account-status-picker--invisible"]:active:not(.hideInteraction_c1e9c4) {
+.colorDefault_c1e9c4[id="set-status-submenu-invisible"].focused_c1e9c4,
+.colorDefault_c1e9c4[id="set-status-submenu-invisible"]:active:not(.hideInteraction_c1e9c4) {
 	background-color: rgb(116,127,141);
 }
 .colorDefault_c1e9c4.focused_c1e9c4 .status_a423bd,
@@ -1919,8 +1936,19 @@ a.metadataDownload_f316dd {
 	grid-template-rows: minmax(24px, auto) 1fr;
 }
 
+.label_c1e9c4,										/* contextmenu				label								*/
 .icon_c1e9c4 {										/* contextmenu				icon								*/
 	color: currentColor !important;
+}
+.icon_c1e9c4 path {									/* contextmenu				icon								*/
+	fill: currentColor !important;
+}
+.item_c1e9c4 .checkbox_f525d3:not(.checked_f525d3) {					/* contextmenu				checkbox							*/
+	border-color: currentColor !important;
+}
+											/* contextmenu				radio								*/
+.item_c1e9c4 .radioIndicator__001a7:not(.radioIndicatorChecked__001a7) .refreshIconStroke__001a7 {
+	stroke: currentColor !important;
 }
 
 .activeIcon_d40c56 path[fill*="hsl(234, "],
@@ -2068,11 +2096,11 @@ a.metadataDownload_f316dd {
 
 /* ----		12.3.		INPUTS						---- */
 
-.input__0f084:not(.error__0f084):not(.success_f8bc55):not(.focused__0f084):not(:focus):hover {
+.input__0f084:not(.error__0f084):not(.success__0f084):not(.focused__0f084):not(:focus):hover {
 	border-color: var(--deprecated-text-input-border-hover);
 }
-.input__0f084:not(.error__0f084):not(.success_f8bc55).focused__0f084,
-.input__0f084:not(.error__0f084):not(.success_f8bc55):focus {
+.input__0f084:not(.error__0f084):not(.success__0f084).focused__0f084,
+.input__0f084:not(.error__0f084):not(.success__0f084):focus {
 	border-color: rgb(var(--accentcolor_v));
 }
 .focused__0f084 {
@@ -2182,10 +2210,10 @@ a.metadataDownload_f316dd {
 	filter: brightness(75%);
 }
 
-.base__5ed84[style*="background-color: rgb(88, 101, 242)"],
-.base__5ed84[style*="background-color: rgb(87, 100, 242)"],
-.base__5ed84[style*="background-color: hsl(227, "],
-.base__5ed84[style*="background-color: hsl(235, "] {
+.base__2b1f5[style*="background-color: rgb(88, 101, 242)"],
+.base__2b1f5[style*="background-color: rgb(87, 100, 242)"],
+.base__2b1f5[style*="background-color: hsl(227, "],
+.base__2b1f5[style*="background-color: hsl(235, "] {
 	background-color: rgb(var(--accentcolor_v)) !important;
 }
 

@@ -2,7 +2,7 @@
  * @name DisplayServersAsChannels
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.8.4
+ * @version 1.8.6
  * @description Displays Servers in a similar way as Channels
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -437,6 +437,9 @@ module.exports = (_ => {
 
 			addCSS () {
 				BDFDB.DOMUtils.appendLocalStyle("DSACStyle" + this.name, `
+					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.stack} {
+						gap: unset !important;
+					}
 					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCN.guildswrapper + BDFDB.notCN.guildswrapperhidden}:not(._closed),
 					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildsscroller},
 					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildswrapperunreadmentionsbartop},
@@ -546,6 +549,7 @@ module.exports = (_ => {
 
 					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildfolderwrapper} {
 						width: auto;
+						margin-bottom: 10px;
 					}
 					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildfolder} {
 						display: flex;
@@ -594,8 +598,9 @@ module.exports = (_ => {
 					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildfolderwrapper} [role="group"] {
 						height: auto !important;
 					}
+					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildfolderwrapper + BDFDB.notCN.guildfolderisexpanded} > ${BDFDB.dotCN.guildouter},
 					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildfolderwrapper} [role="group"] > ${BDFDB.dotCN.guildouter}:last-child {
-						margin-bottom: 10px;
+						margin-bottom: 0;
 					}
 
 					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildbuttoninner} {
@@ -603,7 +608,8 @@ module.exports = (_ => {
 						width: ${this.settings.amounts.serverListWidth - 20}px;
 						transform: unset;
 					}
-					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildbuttoninner} svg {
+					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildbuttoninner} svg,
+					${BDFDB.dotCNS._displayserversaschannelsstyled + BDFDB.dotCNS.guildswrapper + BDFDB.dotCN.guildfavoritesring} {
 						width: ${this.settings.amounts.serverElementHeight/32 * 20}px;
 						height: ${this.settings.amounts.serverElementHeight/32 * 20}px;
 						transform: unset;
