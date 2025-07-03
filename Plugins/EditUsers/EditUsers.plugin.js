@@ -2,7 +2,7 @@
  * @name EditUsers
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 5.0.1
+ * @version 5.0.6
  * @description Allows you to locally edit Users
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -114,7 +114,6 @@ module.exports = (_ => {
 						"MessageContent",
 						"MessageHeader",
 						"MessageUsername",
-						"NameContainer",
 						"NowPlayingItem",
 						"PictureInPictureVideo",
 						"PrivateChannel",
@@ -148,6 +147,7 @@ module.exports = (_ => {
 						"IncomingCallModal",
 						"MessageContent",
 						"MessageReply",
+						"NameContainerInner",
 						"NameTag",
 						"ParticipantsForSelectedParticipant",
 						"PrivateChannel",
@@ -203,7 +203,7 @@ module.exports = (_ => {
 					${BDFDB.dotCN.messagemarkup} span[style*="linear-gradient"] code.inline,
 					${BDFDB.dotCN.messagemarkup} span[style*="linear-gradient"] blockquote,
 					${BDFDB.dotCN.messagemarkup} span[style*="linear-gradient"] ${BDFDB.dotCN.spoilertext} {
-						color: var(--text-normal);
+						color: var(--text-secondary);
 					}
 					${BDFDB.dotCN.mention}[style*="--edited-mention-color"] {
 						background-color: rgba(var(--edited-mention-color), .1) !important;
@@ -588,7 +588,7 @@ module.exports = (_ => {
 			}
 			
 			processUserHeaderAvatar (e) {
-				if (!e.instance.props.user || !changedUsers[e.instance.props.user.id] || e.instance.props.profileType == BDFDB.DiscordConstants.ProfileTypes.PANEL && !this.settings.places.userPanel || e.instance.props.profileType == BDFDB.DiscordConstants.ProfileTypes.BITE_SIZE && !this.settings.places.userPopout || e.instance.props.profileType == BDFDB.DiscordConstants.ProfileTypes.FULL_SIZE && !this.settings.places.userProfile) return;
+				if (!e.instance.props.user || !changedUsers[e.instance.props.user.id] || e.instance.props.themeType == BDFDB.DiscordConstants.ProfileTypes.SIDEBAR && !this.settings.places.userPanel || e.instance.props.themeType == BDFDB.DiscordConstants.ProfileTypes.POPOUT && !this.settings.places.userPopout || (e.instance.props.themeType == BDFDB.DiscordConstants.ProfileTypes.MODAL || e.instance.props.themeType == BDFDB.DiscordConstants.ProfileTypes.MODAL_V2) && !this.settings.places.userProfile) return;
 				let data = changedUsers[e.instance.props.user.id];
 				e.instance.props.user = this.getUserData(e.instance.props.user.id, true, true);
 				if (e.instance.props.displayProfile) {
@@ -602,7 +602,8 @@ module.exports = (_ => {
 			}
 			
 			processUserHeaderUsername (e) {
-				if (!e.instance.props.user || !changedUsers[e.instance.props.user.id] || e.instance.props.profileType == BDFDB.DiscordConstants.ProfileTypes.PANEL && !this.settings.places.userPanel || e.instance.props.profileType == BDFDB.DiscordConstants.ProfileTypes.BITE_SIZE && !this.settings.places.userPopout || e.instance.props.profileType == BDFDB.DiscordConstants.ProfileTypes.FULL_SIZE && !this.settings.places.userProfile) return;
+				let themeType = BDFDB.ObjectUtils.get(e.instance, "props.tags.props.themeType");
+				if (!e.instance.props.user || !changedUsers[e.instance.props.user.id] || themeType == BDFDB.DiscordConstants.ProfileTypes.SIDEBAR && !this.settings.places.userPanel || themeType == BDFDB.DiscordConstants.ProfileTypes.POPOUT && !this.settings.places.userPopout || (themeType == BDFDB.DiscordConstants.ProfileTypes.MODAL || themeType == BDFDB.DiscordConstants.ProfileTypes.MODAL_V2) && !this.settings.places.userProfile) return;
 				let data = changedUsers[e.instance.props.user.id];
 				if (!e.returnvalue) {
 					let nickname = this.getUserNick(e.instance.props.user.id, e.instance.props.nickname || e.instance.props.user.globalName);
@@ -716,21 +717,32 @@ module.exports = (_ => {
 					if (data && (data.removeStatus || data.status || data.statusEmoji)) e.instance.props.customStatusActivity = this.createCustomStatus(data);
 				}
 				else {
-					let accountButton = BDFDB.ReactUtils.findChild(e.returnvalue, {props: ["contentTypes"]});
-					if (accountButton) {
-						const renderChildren = accountButton.props.children;
-						accountButton.props.children = BDFDB.TimeUtils.suppress((...args) => {
-							const returnValue = renderChildren(...args);
-							const renderNameTag = returnValue.props.renderNameTag;
-							returnValue.props.renderNameTag = BDFDB.TimeUtils.suppress((...args2) => {
-								const nameTag = renderNameTag(...args2);
-								let username = BDFDB.ReactUtils.findChild(nameTag, {props: [["className", BDFDB.disCN.accountinfodetails]]});
-								if (username) this.changeUserColor(username.props.children, e.instance.props.currentUser.id);
-								return nameTag;
-							}, "Error in Render NameTag in Account Button!", this);
-							return returnValue;
-						}, "Error in Children Render of Account Button!", this);
+					let changeAccountName = parent => {
+						let accountButton = BDFDB.ReactUtils.findChild(parent, {props: ["contentTypes"]});
+						if (accountButton) {
+							const renderChildren = accountButton.props.children;
+							accountButton.props.children = BDFDB.TimeUtils.suppress((...args) => {
+								const returnValue = renderChildren(...args);
+								const renderNameTag = returnValue.props.renderNameTag;
+								returnValue.props.renderNameTag = BDFDB.TimeUtils.suppress((...args2) => {
+									const nameTag = renderNameTag(...args2);
+									let username = BDFDB.ReactUtils.findChild(nameTag, {props: [["className", BDFDB.disCN.accountinfodetails]]});
+									if (username) this.changeUserColor(username.props.children, e.instance.props.currentUser.id);
+									return nameTag;
+								}, "Error in Render NameTag in Account Button!", this);
+								return returnValue;
+							}, "Error in Children Render of Account Button!", this);
+						}
+					};
+					if (typeof e.returnvalue.props.children == "function") {
+						let childrenRender = e.returnvalue.props.children;
+						e.returnvalue.props.children = BDFDB.TimeUtils.suppress((...args) => {
+							let renderedChildren = childrenRender(...args);
+							changeAccountName(renderedChildren);
+							return renderedChildren;
+						}, "Error in Children Render in Account!", this);
 					}
+					else changeAccountName(children[index]);
 				}
 			}
 
@@ -829,7 +841,7 @@ module.exports = (_ => {
 				}
 				let fontGradient = BDFDB.ObjectUtils.is(color1);
 				if (!fontGradient) return;
-				let [children, index] = BDFDB.ReactUtils.findParent(e.instance.props.username, {filter: n => n && n.props && n.props.decorations});
+				let [children, index] = BDFDB.ReactUtils.findParent(e.instance.props.username, {filter: n => n && n.props && n.props.onPopoutRequestClose});
 				if (index == -1) return;
 				children[index] = BDFDB.ReactUtils.createElement("span", {
 					style: {
@@ -1015,10 +1027,16 @@ module.exports = (_ => {
 				if (data) {
 					let member = BDFDB.LibraryStores.GuildMemberStore.getMember(e.instance.props.channel.guild_id, e.instance.props.user.id);
 					if (data.color1) {
-						if (BDFDB.LibraryStores.AccessibilityStore.roleStyle != "dot") e.instance.props.colorString = null;
+						if (BDFDB.LibraryStores.AccessibilityStore.roleStyle != "dot") {
+							e.instance.props.colorString = null;
+							if (e.instance.props.colorStrings) for (let key in e.instance.props.colorStrings) e.instance.props.colorStrings[key] = null;
+						}
 						else {
 							let color1 = data.color1 && data.useRoleColor && (member || {}).colorString || data.color1;
-							if (color1) e.instance.props.colorString = BDFDB.ColorUtils.convert(BDFDB.ObjectUtils.is(color1) ? color1[0] : color1, "HEX");
+							if (color1) {
+								e.instance.props.colorString = BDFDB.ColorUtils.convert(BDFDB.ObjectUtils.is(color1) ? color1[0] : color1, "HEX");
+								if (e.instance.props.colorStrings) e.instance.props.colorStrings.primaryColor = e.instance.props.colorString;
+							}
 						}
 					}
 					if (data.name) {
@@ -1032,14 +1050,27 @@ module.exports = (_ => {
 				}
 			}
 			
-			processNameContainer (e) {
+			processNameContainerInner (e) {
+				if (!e.instance.props.user) return;
 				let channelId = BDFDB.LibraryStores.SelectedChannelStore.getChannelId();
 				if (!this.settings.places.memberList || !this.shouldChangeInChat(channelId)) return;
-				let userId = BDFDB.ReactUtils.findValue(e.instance.props.name, "userId");
-				if (!userId) return;
-				let guildId = BDFDB.LibraryStores.SelectedGuildStore.getGuildId();
-				this.changeUserColor(e.instance.props.name, userId, {e: e, guildId: guildId});
-				this.injectBadge(BDFDB.ObjectUtils.get(e.instance, "props.decorators.props.children"), userId, guildId, 2, {
+				let data = changedUsers[e.instance.props.user.id] || {};
+				if (data.color1) {
+					let className = e.returnvalue.props.children[0].props.className;
+					e.returnvalue.props.children[0] = BDFDB.ReactUtils.createElement("span", {
+						className: BDFDB.disCNS.membername + BDFDB.disCN.membernameuser,
+						children: e.returnvalue.props.children[0].props.name
+					});
+					this.changeUserColor(e.returnvalue.props.children[0], e.instance.props.user.id, {e: e, guildId: e.instance.props.guildId});
+					e.returnvalue.props.children[0] = BDFDB.ReactUtils.createElement("span", {
+						className: BDFDB.DOMUtils.formatClassName(className, BDFDB.disCN.membernameouter),
+						children: BDFDB.ReactUtils.createElement("span", {
+							className: BDFDB.disCN.membernamecontainer,
+							children: e.returnvalue.props.children[0]
+						})
+					});
+				}
+				this.injectBadge(e.returnvalue.props.children, e.instance.props.user.id, e.instance.props.guildId, 2, {
 					tagClass: BDFDB.disCN.bottagmember
 				});
 			}

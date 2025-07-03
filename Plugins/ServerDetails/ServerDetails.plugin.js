@@ -2,7 +2,7 @@
  * @name ServerDetails
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.2.5
+ * @version 1.2.9
  * @description Shows Server Details in the Server List Tooltip
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -79,7 +79,7 @@ module.exports = (_ => {
 				}
 			}
 			componentDidMount() {
-				BDFDB.DOMUtils.addClass(BDFDB.DOMUtils.getParent(BDFDB.dotCN.tooltip, BDFDB.ReactUtils.findDOMNode(this)), BDFDB.disCN._serverdetailstooltip);
+				if (!_this.settings.amounts.tooltipDelay && (!_this.settings.general.onlyShowOnShift || _this.settings.general.onlyShowOnShift && this.props.shiftKey)) BDFDB.DOMUtils.addClass(BDFDB.DOMUtils.getParent(BDFDB.dotCN.tooltip, BDFDB.ReactUtils.findDOMNode(this)), BDFDB.disCN._serverdetailstooltip);
 			}
 			render() {
 				if (_this.settings.general.onlyShowOnShift) {
@@ -120,7 +120,7 @@ module.exports = (_ => {
 				}
 				else {
 					let src = this.props.guild.getIconURL(4096, this.props.guild.icon && BDFDB.LibraryModules.IconUtils.isAnimatedIconHash(this.props.guild.icon));
-					let roles = this.props.guild.roles || BDFDB.LibraryStores.GuildStore.getRoles(this.props.guild.id);
+					let roles = this.props.guild.roles || BDFDB.LibraryStores.GuildRoleStore.getRoles(this.props.guild.id);
 					return BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Flex, {
 						direction: BDFDB.LibraryComponents.Flex.Direction.VERTICAL,
 						align: BDFDB.LibraryComponents.Flex.Align.CENTER,
@@ -240,8 +240,8 @@ module.exports = (_ => {
 						overflow: hidden;
 					}
 					${BDFDB.dotCN._serverdetailstooltip} div${BDFDB.dotCN._serverdetailsicon} {
-						background-color: var(--background-primary);
-						color: var(--text-normal);
+						background-color: var(--background-base-low);
+						color: var(--text-secondary);
 						font-size: 40px;
 					}
 				`;
@@ -368,7 +368,7 @@ module.exports = (_ => {
 						type: "right",
 						guild: e.instance.props.guild,
 						list: true,
-						offset: 12
+						offset: 4
 					}),
 					text: (instance, event) => BDFDB.ReactUtils.createElement(GuildDetailsComponent, {
 						shiftKey: event.shiftKey,

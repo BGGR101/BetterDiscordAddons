@@ -26,6 +26,7 @@
  * @var text				textdark_s			"Text Color 4: [default] = 142, 146, 151"		140, 140, 140
  * @var text				textdarker_s			"Text Color 5: [default] = 114, 118, 125"		115, 115, 115
  * @var text				textdarkest_s			"Text Color 6: [default] = 79, 84, 92"			80, 80, 80
+ * @var text				backgroundcode_s		"Background Code: [default] = 60, 62, 79"		50, 50, 50
  * @var text				backgroundaccent_s		"Background Accent: [default] = 64, 68, 75"		50, 50, 50
  * @var text				backgroundprimary_s		"Background 1: [default] = 54, 57, 63"			30, 30, 30
  * @var text				backgroundsecondary_s		"Background 2: [default] = 47, 49, 54"			20, 20, 20
@@ -52,6 +53,8 @@
 	--warningcolor: 		250,166,26;			/*	Warning Color		-	default:	250,166,26		-	hex:	#faa61a		*/
 	--dangercolor:  		237,66,69;			/*	Danger Color		-	default:	237,66,69		-	hex:	#ed4245		*/
 	
+	--framecolor:  			151,151,159,0.121;		/*	App Frame Color		-	default:	151,151,159,0.121	-	hex:	#97979f1f	*/
+	
 	--textbrightest: 		255,255,255;			/*	Text Color 1		-	default:	255,255,255		-	hex:	#ffffff		*/
 	--textbrighter: 		222,222,222;			/*	Text Color 2		-	default:	220,221,222		-	hex:	#dcddde		*/
 	--textbright: 			185,185,185;			/*	Text Color 3		-	default:	185,187,190		-	hex:	#b9bbbe		*/
@@ -59,6 +62,7 @@
 	--textdarker: 			115,115,115;			/*	Text Color 5		-	default:	114,118,125		-	hex:	#72767d		*/
 	--textdarkest: 			80,80,80;			/*	Text Color 6		-	default:	79,84,92		-	hex:	#4f545c		*/
 	
+	--backgroundcode: 		30,30,30;			/*	Background Code		-	default:	60,62,79		-	hex:	#3c3e4f		*/
 	--backgroundaccent: 		50,50,50;			/*	Background Accent	-	default:	64,68,75		-	hex:	#40444b		*/
 	--backgroundprimary: 		30,30,30;			/*	Background 1		-	default:	54,57,63		-	hex:	#36393f		*/
 	--backgroundsecondary: 		20,20,20;			/*	Background 2		-	default:	47,49,54		-	hex:	#2f3136		*/

@@ -2,7 +2,7 @@
  * @name ShowConnections
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.2.6
+ * @version 1.2.9
  * @description Shows the connected Accounts of a User in the UserPopout
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -14,7 +14,9 @@
 
 module.exports = (_ => {
 	const changeLog = {
-		
+		"improved": {
+			"Themed Popups": "Icons now adapt to the Color of Custom User Popups. Meaning bright Colors -> dark Icons and dark Colors -> bright Icons"
+		}
 	};
 
 	return !window.BDFDB_Global || (!window.BDFDB_Global.loaded && !window.BDFDB_Global.started) ? class {
@@ -56,7 +58,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -80,77 +82,68 @@ module.exports = (_ => {
 				let isLightTheme = (!this.props.theme || this.props.theme == "light") && BDFDB.DiscordUtils.getTheme() == BDFDB.disCN.themelight;
 				return BDFDB.ReactUtils.createElement("section", {
 					className: BDFDB.DOMUtils.formatClassName(BDFDB.disCN.userprofilesection, BDFDB.disCN._showconnectionsconnectionswrapper),
-					children: [
-						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Heading, {
-							className: BDFDB.disCN.userprofilesectionheading,
-							variant: "text-xs/semibold",
-							style: {color: "var(--header-secondary)"},
-							color: null,
-							children: BDFDB.LanguageUtils.LanguageStrings.CONNECTIONS
-						}),
-						BDFDB.ReactUtils.createElement("div", {
-							className: BDFDB.disCN._showconnectionsconnections,
-							children: connections.map(c => {
-								let provider = BDFDB.LibraryModules.ConnectionProviderUtils.get(c.type);
-								let url = _this.settings.general.openWebpage && provider.getPlatformUserUrl && provider.getPlatformUserUrl(c);
-								let metadata = [];
-								if (_this.settings.general.showDetails && provider.hasMetadata && c.metadata) {
-									if (c.metadata.created_at) metadata.push(BDFDB.ReactUtils.createElement("span", {children: BDFDB.LanguageUtils.LanguageStringsFormat("CONNECTIONS_PROFILE_MEMBER_SINCE", (new Date(c.metadata.created_at)).toLocaleDateString("default", {year: "numeric", month: "long", day: "numeric"}))}));
-								}
-								return BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TooltipContainer, {
-									text: `${provider.name}: ${c.name}`,
-									note: metadata && metadata.length ? BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Flex, {
-										direction: BDFDB.LibraryComponents.Flex.Direction.VERTICAL,
-										children: metadata
-									}): null,
-									tooltipConfig: {backgroundColor: _this.settings.general.useColoredTooltips && BDFDB.ColorUtils.change(provider.color, -0.3), color: !_this.settings.general.useColoredTooltips || !provider.color ? "black" : null},
-									children: BDFDB.ReactUtils.createElement(!url ? "div" : BDFDB.LibraryComponents.Anchor, Object.assign(!url ? {} : {
-										href: url
-									}, {
-										className: BDFDB.DOMUtils.formatClassName(BDFDB.disCN._showconnectionsconnection, url && BDFDB.disCN.cursorpointer),
-										onContextMenu: event => {
-											BDFDB.ContextMenuUtils.open(_this, event, BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuGroup, {
-												children: [
-													BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuItem, {
-														label: BDFDB.LanguageUtils.LibraryStringsFormat("copy", BDFDB.LanguageUtils.LanguageStrings.USER_SETTINGS_LABEL_USERNAME),
-														id: BDFDB.ContextMenuUtils.createItemId(_this.name, "copy-name"),
-														action: _ => BDFDB.LibraryModules.WindowUtils.copy(c.name)
-													}),
-													url && BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuItem, {
-														label: BDFDB.LanguageUtils.LibraryStringsFormat("copy", BDFDB.LanguageUtils.LanguageStrings.SEARCH_ANSWER_HAS_LINK),
-														id: BDFDB.ContextMenuUtils.createItemId(_this.name, "copy-url"),
-														action: _ => BDFDB.LibraryModules.WindowUtils.copy(url)
-													})
-												]
-											}));
-										},
-										children: [
-											BDFDB.ReactUtils.createElement("img", {
-												className: BDFDB.disCN._showconnectionsicon,
-												alt: BDFDB.LanguageUtils.LanguageStringsFormat("IMG_ALT_LOGO", provider.name),
-												src: provider.icon[_this.settings.general.useColoredIcons ? (isLightTheme ? "lightSVG" : "darkSVG" ) : "whiteSVG"]
-											}),
-											_this.settings.general.showVerifiedBadge && c.verified && BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TooltipContainer, {
-												text: BDFDB.LanguageUtils.LanguageStrings.CONNECTION_VERIFIED,
-												tooltipConfig: {color: "brand", type: "bottom"},
-												children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.FlowerStar, {
-													className: BDFDB.disCN._showconnectionsverifiedbadge,
-													size: "50%",
-													color: isLightTheme ? BDFDB.DiscordConstants.Colors.PRIMARY_200 : BDFDB.DiscordConstants.Colors.PRIMARY,
-													children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SvgIcon, {
-														name: BDFDB.LibraryComponents.SvgIcon.Names.CHECKMARK,
-														width: "70%",
-														height: "70%",
-														color: isLightTheme ? BDFDB.DiscordConstants.Colors.PRIMARY_500 : BDFDB.DiscordConstants.Colors.WHITE
-													})
+					children: BDFDB.ReactUtils.createElement("div", {
+						className: BDFDB.disCN._showconnectionsconnections,
+						children: connections.map(c => {
+							let provider = BDFDB.LibraryModules.ConnectionProviderUtils.get(c.type);
+							let url = _this.settings.general.openWebpage && provider.getPlatformUserUrl && provider.getPlatformUserUrl(c);
+							let metadata = [];
+							if (_this.settings.general.showDetails && provider.hasMetadata && c.metadata) {
+								if (c.metadata.created_at) metadata.push(BDFDB.ReactUtils.createElement("span", {children: BDFDB.LanguageUtils.LanguageStringsFormat("CONNECTIONS_PROFILE_MEMBER_SINCE", (new Date(c.metadata.created_at)).toLocaleDateString("default", {year: "numeric", month: "long", day: "numeric"}))}));
+							}
+							return BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TooltipContainer, {
+								text: `${provider.name}: ${c.name}`,
+								note: metadata && metadata.length ? BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Flex, {
+									direction: BDFDB.LibraryComponents.Flex.Direction.VERTICAL,
+									children: metadata
+								}): null,
+								tooltipConfig: {backgroundColor: _this.settings.general.useColoredTooltips && BDFDB.ColorUtils.change(provider.color, -0.3), color: !_this.settings.general.useColoredTooltips || !provider.color ? "black" : null},
+								children: BDFDB.ReactUtils.createElement(!url ? "div" : BDFDB.LibraryComponents.Anchor, Object.assign(!url ? {} : {
+									href: url
+								}, {
+									className: BDFDB.DOMUtils.formatClassName(BDFDB.disCN._showconnectionsconnection, url && BDFDB.disCN.cursorpointer),
+									onContextMenu: event => {
+										BDFDB.ContextMenuUtils.open(_this, event, BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuGroup, {
+											children: [
+												BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuItem, {
+													label: BDFDB.LanguageUtils.LibraryStringsFormat("copy", BDFDB.LanguageUtils.LanguageStrings.USER_SETTINGS_LABEL_USERNAME),
+													id: BDFDB.ContextMenuUtils.createItemId(_this.name, "copy-name"),
+													action: _ => BDFDB.LibraryModules.WindowUtils.copy(c.name)
+												}),
+												url && BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuItem, {
+													label: BDFDB.LanguageUtils.LibraryStringsFormat("copy", BDFDB.LanguageUtils.LanguageStrings.SEARCH_ANSWER_HAS_LINK),
+													id: BDFDB.ContextMenuUtils.createItemId(_this.name, "copy-url"),
+													action: _ => BDFDB.LibraryModules.WindowUtils.copy(url)
+												})
+											]
+										}));
+									},
+									children: [
+										BDFDB.ReactUtils.createElement("img", {
+											className: BDFDB.disCN._showconnectionsicon,
+											alt: BDFDB.LanguageUtils.LanguageStringsFormat("IMG_ALT_LOGO", provider.name),
+											src: provider.icon[this.props.popoutColor ? (BDFDB.ColorUtils.isBright(this.props.popoutColor) ? "lightSVG" : "darkSVG") : (_this.settings.general.useColoredIcons ? (isLightTheme ? "lightSVG" : "darkSVG") : "whiteSVG")]
+										}),
+										_this.settings.general.showVerifiedBadge && c.verified && BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TooltipContainer, {
+											text: BDFDB.LanguageUtils.LanguageStrings.CONNECTION_VERIFIED,
+											tooltipConfig: {color: "brand", type: "bottom"},
+											children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.FlowerStar, {
+												className: BDFDB.disCN._showconnectionsverifiedbadge,
+												size: "50%",
+												color: isLightTheme ? BDFDB.DiscordConstants.Colors.PRIMARY_200 : BDFDB.DiscordConstants.Colors.PRIMARY,
+												children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SvgIcon, {
+													name: BDFDB.LibraryComponents.SvgIcon.Names.CHECKMARK,
+													width: "70%",
+													height: "70%",
+													color: isLightTheme ? BDFDB.DiscordConstants.Colors.PRIMARY_500 : BDFDB.DiscordConstants.Colors.WHITE
 												})
 											})
-										]
-									}))
-								});
-							})
+										})
+									]
+								}))
+							});
 						})
-					]
+					})
 				});
 			}
 		};
@@ -212,12 +205,14 @@ module.exports = (_ => {
 			
 			onStart () {				
 				BDFDB.PatchUtils.patch(this, BDFDB.LibraryModules.DispatchApiUtils, "dispatch", {after: e => {
-					if (BDFDB.ObjectUtils.is(e.methodArguments[0]) && e.methodArguments[0].type == "USER_PROFILE_FETCH_SUCCESS" && e.methodArguments[0].user && e.methodArguments[0].connected_accounts) {
-						const user = e.methodArguments[0].user;
-						delete requestedUsers[user.id];
-						loadedUsers[user.id] = e.methodArguments[0].connected_accounts;
-						BDFDB.ReactUtils.forceUpdate(queuedInstances[user.id]);
-						delete queuedInstances[user.id];
+					if (BDFDB.ObjectUtils.is(e.methodArguments[0]) && e.methodArguments[0].type == "USER_PROFILE_FETCH_SUCCESS") {
+						let userProfile = e.methodArguments[0].userProfile || e.methodArguments[0];
+						if (userProfile.user && userProfile.connected_accounts) {
+							delete requestedUsers[userProfile.user.id];
+							loadedUsers[userProfile.user.id] = userProfile.connected_accounts;
+							BDFDB.ReactUtils.forceUpdate(queuedInstances[userProfile.user.id]);
+							delete queuedInstances[userProfile.user.id];
+						}
 					}
 				}});
 			}
@@ -260,13 +255,14 @@ module.exports = (_ => {
 			}
 
 			processUserHeaderUsername (e) {
-				if (e.instance.props.profileType != "BITE_SIZE" || e.instance.props.className) return;
+				let themeType = BDFDB.ObjectUtils.get(e.instance, "props.tags.props.themeType");
+				if (themeType != BDFDB.DiscordConstants.ProfileTypes.SIDEBAR && themeType != BDFDB.DiscordConstants.ProfileTypes.POPOUT || e.instance.props.className) return;
 				let user = e.instance.props.user || BDFDB.LibraryStores.UserStore.getUser(e.instance.props.userId);
 				if (!user || user.isNonUserBot()) return;
 				e.returnvalue = [e.returnvalue].flat(10);
 				e.returnvalue.push(BDFDB.ReactUtils.createElement(UserConnectionsComponents, {
 					user: user,
-					isSimplified: true,
+					popoutColor: BDFDB.ObjectUtils.get(e.instance, "props.tags.props.displayProfile.themeColors.1"),
 					theme: e.instance.props.theme
 				}, true));
 			}

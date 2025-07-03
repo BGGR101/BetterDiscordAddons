@@ -2,7 +2,7 @@
  * @name PersonalPins
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 2.2.4
+ * @version 2.2.9
  * @description Allows you to locally pin Messages
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -227,7 +227,7 @@ module.exports = (_ => {
 								justify: BDFDB.LibraryComponents.Flex.Justify.END,
 								children: [note.tags].flat(10).filter(n => n).map(label => BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Badges.TextBadge, {
 									className: BDFDB.disCN._personalpinsmessagetag,
-									color: "var(--background-tertiary)",
+									color: "var(--background-base-lowest)",
 									onClick: _ => {
 										BDFDB.ArrayUtils.remove(note.tags, label, true);
 										BDFDB.DataUtils.save(notes, _this, "notes");
@@ -251,7 +251,7 @@ module.exports = (_ => {
 								})).concat(BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.PopoutContainer, {
 									children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Badges.TextBadge, {
 										className: BDFDB.disCNS._personalpinsmessagetag + BDFDB.disCN._personalpinsmessagetagadd,
-										color: "var(--background-tertiary)",
+										color: "var(--background-base-lowest)",
 										text: "+"
 									}),
 									animation: BDFDB.LibraryComponents.PopoutContainer.Animation.SCALE,
@@ -285,7 +285,7 @@ module.exports = (_ => {
 					children: [
 						BDFDB.ReactUtils.createElement("div", {
 							className: BDFDB.disCNS.messagespopouttabbarheader + BDFDB.disCN.messagespopoutheader,
-							style: {paddingBottom: 4},
+							style: {paddingBottom: 0},
 							children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Flex, {
 								direction: BDFDB.LibraryComponents.Flex.Direction.VERTICAL,
 								children: [
@@ -326,6 +326,7 @@ module.exports = (_ => {
 												className: BDFDB.disCN.messagespopouttabbarinner,
 												itemClassName: BDFDB.disCN.messagespopouttabbartab,
 												type: BDFDB.LibraryComponents.TabBar.Types.TOP,
+												look: BDFDB.LibraryComponents.TabBar.Looks.BRAND,
 												selectedItem: popoutProps.selectedFilter.value,
 												items: filterKeys.map(option => _this.getPopoutValue(option, "filter")),
 												style: {marginRight: "auto"},
@@ -377,16 +378,22 @@ module.exports = (_ => {
 				_this = this;
 				
 				this.defaults = {
+					general: {
+						addQuickTranslateButton:	{value: true, 	description: "Adds a Quick Note Button in the Message Actions Bar"}
+					},
 					choices: {
-						defaultFilter:		{value: filterKeys[0], 		options: filterKeys,		type: "filter",		description: "Default choice tab"},
-						defaultSort:		{value: sortKeys[0], 		options: sortKeys,		type: "sort",		description: "Default sort choice"},
-						defaultOrder:		{value: orderKeys[0], 		options: orderKeys,		type: "order",		description: "Default order choice"},
+						defaultFilter:			{value: filterKeys[0], 		options: filterKeys,		type: "filter",		description: "Default Choice Tab"},
+						defaultSort:			{value: sortKeys[0], 		options: sortKeys,		type: "sort",		description: "Default Sort Choice"},
+						defaultOrder:			{value: orderKeys[0], 		options: orderKeys,		type: "order",		description: "Default Order Choice"},
 					}
 				};
 			
 				this.modulePatches = {
 					before: [
 						"HeaderBar"
+					],
+					after: [
+						"MessageButtons"
 					]
 				};
 				
@@ -429,7 +436,8 @@ module.exports = (_ => {
 				BDFDB.PatchUtils.patch(this, BDFDB.LibraryModules.MessageToolbarUtils, "useMessageMenu", {after: e => {
 					if (e.instance.props.message && e.instance.props.channel) {
 						let note = this.getNoteData(e.instance.props.message, e.instance.props.channel);
-						let [children, index] = BDFDB.ContextMenuUtils.findItem(e.returnValue, {id: ["pin", "unpin"]});
+						let [children, index] = BDFDB.ContextMenuUtils.findItem(e.returnValue, {id: ["copy-text", "pin", "unpin"]});
+						if (index == -1) [children, index] = BDFDB.ContextMenuUtils.findItem(e.returnValue, {id: ["edit", "add-reaction", "add-reaction-1", "quote"]});
 						children.splice(index + 1, 0, BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuItem, {
 							label: note ? this.labels.context_unpinoption : this.labels.context_pinoption,
 							id: BDFDB.ContextMenuUtils.createItemId(this.name, note ? "unpin-note" : "pin-note"),
@@ -462,6 +470,15 @@ module.exports = (_ => {
 					collapseStates: collapseStates,
 					children: _ => {
 						let settingsItems = [];
+						
+						for (let key in this.settings.general) settingsItems.push(BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SettingsSaveItem, {
+							type: "Switch",
+							plugin: this,
+							keys: ["general", key],
+							label: this.defaults.general[key].description,
+							tag: BDFDB.LibraryComponents.FormTitle.Tags.H5,
+							value: this.settings.general[key]
+						}));
 						
 						for (let key in this.settings.choices) settingsItems.push(BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SettingsSaveItem, {
 							type: "Select",
@@ -501,8 +518,8 @@ module.exports = (_ => {
 				if (e.instance.props.message && e.instance.props.channel) {
 					let note = this.getNoteData(e.instance.props.message, e.instance.props.channel);
 					let hint = BDFDB.BDUtils.isPluginEnabled("MessageUtilities") ? BDFDB.BDUtils.getPlugin("MessageUtilities").getActiveShortcutString("__Note_Message") : null;
-					let [children, index] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: ["pin", "unpin"]});
-					if (index == -1) [children, index] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: ["copy-text", "edit", "add-reaction", "add-reaction-1", "quote"]});
+					let [children, index] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: ["copy-text", "pin", "unpin"]});
+					if (index == -1) [children, index] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: ["edit", "add-reaction", "add-reaction-1", "quote"]});
 					children.splice(index > -1 ? index + 1: 0, 0, BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuItem, {
 						label: note ? this.labels.context_unpinoption : this.labels.context_pinoption,
 						id: BDFDB.ContextMenuUtils.createItemId(this.name, note ? "unpin-note" : "pin-note"),
@@ -523,6 +540,54 @@ module.exports = (_ => {
 						action: _ => this.updateNoteData(note, e.instance.props.message)
 					}));
 				}
+			}
+			
+			processMessageButtons (e) {
+				if (!this.settings.general.addQuickTranslateButton || !e.instance.props.message || !e.instance.props.channel) return;
+				let [children, index] = BDFDB.ReactUtils.findParent(e.returnvalue, {props: [["className", BDFDB.disCN.messagebuttons]]});
+				if (index == -1) return;
+				let note = this.getNoteData(e.instance.props.message, e.instance.props.channel);
+				children.unshift(BDFDB.ReactUtils.createElement(class extends BdApi.React.Component {
+					render() {
+						return BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TooltipContainer, {
+							key: note ? "unpin-note" : "pin-note",
+							text: _ => note ? _this.labels.context_unpinoption : _this.labels.context_pinoption,
+							tooltipConfig: {className: BDFDB.disCN.messagetoolbartooltip},
+							children: BDFDB.ReactUtils.createElement("div", {
+								className: BDFDB.disCNS.messagetoolbarhoverbutton + BDFDB.disCN.messagetoolbarbutton,
+								onClick: _ => {
+									_this.addMessageToNotes(e.instance.props.message, e.instance.props.channel);
+									note = _this.getNoteData(e.instance.props.message, e.instance.props.channel);
+									BDFDB.ReactUtils.forceUpdate(this);
+								},
+								children: BDFDB.ReactUtils.createElement("div", {
+									className: BDFDB.disCNS.messagetoolbaricon + BDFDB.disCN.messagetoolbarbuttoncontent,
+									children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SvgIcon, {
+										className: BDFDB.disCN.messagetoolbaricon,
+										nativeClass: true,
+										iconSVG: note ? pinIconDelete : pinIcon
+									})
+								})
+							})
+						})
+					}
+				}));
+				if (this.isNoteOutdated(note, e.instance.props.message)) children.unshift(BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TooltipContainer, {
+					key: "update-note",
+					text: this.labels.context_updateoption,
+					tooltipConfig: {className: BDFDB.disCN.messagetoolbartooltip},
+					children: BDFDB.ReactUtils.createElement("div", {
+						className: BDFDB.disCNS.messagetoolbarhoverbutton + BDFDB.disCN.messagetoolbarbutton,
+						onClick: _ => this.updateNoteData(note, e.instance.props.message),
+						children: BDFDB.ReactUtils.createElement("div", {
+							className: BDFDB.disCNS.messagetoolbaricon + BDFDB.disCN.messagetoolbarbuttoncontent,
+							children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SvgIcon, {
+								className: BDFDB.disCN.messagetoolbaricon,
+								iconSVG: pinIconUpdate
+							})
+						})
+					})
+				}));
 			}
 
 			processHeaderBar (e) {

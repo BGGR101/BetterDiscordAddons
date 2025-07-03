@@ -66,6 +66,7 @@
 #app-mount .layer__960e4 ~ .layer__960e4 .sidebarRegion__23e6b,
 #app-mount .layer__960e4 ~ .layer__960e4 .sidebarRegionScroller__23e6b {
 	flex: 0 0 auto !important;
+	margin-top: 0 !important;
 }
 #app-mount .layer__960e4 ~ .layer__960e4 .sidebar__23e6b {
 	width: 218px !important;
@@ -126,7 +127,7 @@
 #app-mount > .appAsidePanelWrapper_a3002d > .notAppAsidePanel_a3002d .contentRegion__23e6b .toolsContainer__23e6b .keybind_c2b141 {
 	display: none !important;
 }
-#app-mount .layer__960e4 ~ .layer__960e4 .settingsToolbar_wu4yfQ {
+#app-mount .layer__960e4 ~ .layer__960e4 .settingsToolbar_8227b0 {
 	display: none !important;
 }
 #app-mount .layer__960e4 ~ .layer__960e4 .accountProfileCard__1fed1 {
@@ -166,6 +167,9 @@
 #app-mount .layer__960e4 ~ .layer__960e4 .guildsSection__337a8 {
 	max-width: calc(var(--settingswidth_v) - 352px - var(--settingsiconsadditionalsize)) !important;
 }
+#app-mount .layer__960e4 ~ .layer__960e4 .container__9293f.headerBar__80679 {
+	position: static !important;
+}
 
 #app-mount .root__5c9fc {
 	position: fixed !important;
@@ -190,6 +194,7 @@
 #app-mount .root__5c9fc .closeIconWrapper__6fd0e,
 #app-mount .root__5c9fc .closeIconWrapper__6fd0e .container_c2b141,
 #app-mount .root__5c9fc .closeIconWrapper__6fd0e .closeButton_c2b141,
+#app-mount .shop__6db1d .alignedRightContent__80679,
 #app-mount .shop__6db1d .container_c2b141,
 #app-mount .shop__6db1d .closeButton_c2b141 {
 	position: fixed !important;

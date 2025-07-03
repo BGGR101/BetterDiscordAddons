@@ -2,7 +2,7 @@
  * @name WriteUpperCase
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.4.3
+ * @version 1.4.5
  * @description Changes the first Letter of each Sentence in Message Inputs to Uppercase
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -188,7 +188,7 @@ module.exports = (_ => {
 			}
 			
 			parse (string) {
-				if (!string.length || /<[#@][!&]{0,1}\d+>|@here|@everyone|:[A-z0-9_-]+:|[\uD83C-\uDBFF\uDC00-\uDFFF]+/.test(string)) return string;
+				if (!string.length) return string;
 				let newString = string, stop = false;
 				let language = BDFDB.LanguageUtils.getLanguage().id;
 				for (let space of spaces) for (let symbol of symbols) if (!stop) {
@@ -200,8 +200,8 @@ module.exports = (_ => {
 						let sentence = sentences[i];
 						let lowSentence = sentence.toLocaleLowerCase(language);
 						let first = sentence.charAt(0);
-						if (first === first.toLocaleUpperCase(language) && (lowSentence.indexOf("http") == 0 || lowSentence.indexOf("s/") == 0)) sentences[i] = sentence.charAt(0).toLocaleLowerCase(language) + sentence.slice(1);
-						else if (first === first.toLocaleLowerCase(language) && first !== first.toLocaleUpperCase(language) && lowSentence.indexOf("http") != 0 && lowSentence.indexOf("s/") != 0) sentences[i] = sentence.charAt(0).toLocaleUpperCase(language) + sentence.slice(1);
+						if (first === first.toLocaleUpperCase(language) && (lowSentence.indexOf("http") == 0 || lowSentence.indexOf("discord.gg") == 0 || lowSentence.indexOf("s/") == 0)) sentences[i] = sentence.charAt(0).toLocaleLowerCase(language) + sentence.slice(1);
+						else if (first === first.toLocaleLowerCase(language) && first !== first.toLocaleUpperCase(language) && lowSentence.indexOf("http") != 0 && lowSentence.indexOf("discord.gg") != 0 && lowSentence.indexOf("s/") != 0) sentences[i] = sentence.charAt(0).toLocaleUpperCase(language) + sentence.slice(1);
 						if (sentence.indexOf("```") > -1) stop = true;
 					}
 					newString = sentences.join(symbol + space);

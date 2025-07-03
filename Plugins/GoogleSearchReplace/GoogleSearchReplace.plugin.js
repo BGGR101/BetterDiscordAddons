@@ -2,7 +2,7 @@
  * @name GoogleSearchReplace
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.3.9
+ * @version 1.4.0
  * @description Replaces the default Google Text Search with a custom Search Engine
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -140,8 +140,7 @@ module.exports = (_ => {
 											if (!values.engineName) instance.props.errorMessage = "Enter a Name";
 											else if (ownEngines[values.engineName] || this.defaults.engines[values.engineName]) instance.props.errorMessage = "Engine already exists";
 											else delete instance.props.errorMessage;
-											values.addButton.props.disabled = !Object.keys(values).every(valueName => values[valueName]);
-											BDFDB.ReactUtils.forceUpdate(values.addButton);
+											values.addButton.setState({disabled: !Object.keys(values).every(valueName => values[valueName])});
 										},
 										inputChildren: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Button, {
 											disabled: !Object.keys(values).every(valueName => values[valueName]),
@@ -166,8 +165,7 @@ module.exports = (_ => {
 											values.engineUrl = value.trim();
 											if (!values.engineUrl) instance.props.errorMessage = "Enter an URL";
 											else delete instance.props.errorMessage;
-											values.addButton.props.disabled = !Object.keys(values).every(valueName => values[valueName]);
-											BDFDB.ReactUtils.forceUpdate(values.addButton);
+											values.addButton.setState({disabled: !Object.keys(values).every(valueName => values[valueName])});
 										}
 									})
 								})

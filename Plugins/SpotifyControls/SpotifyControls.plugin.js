@@ -2,7 +2,7 @@
  * @name SpotifyControls
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.4.6
+ * @version 1.5.1
  * @description Adds a Control Panel while listening to Spotify on a connected Account
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -144,7 +144,6 @@ module.exports = (_ => {
 					stopTime = new Date();
 				}
 				if (!lastSong) return null;
-				
 				let coverSrc = (BDFDB.ReactUtils.hookCall(BDFDB.LibraryModules.ApplicationAssetUtils.getAssetImage, lastSong) || {largeImage: {}}).largeImage.src;
 				let connection = (BDFDB.LibraryStores.ConnectedAccountsStore.getAccounts().find(n => n.type == "spotify") || {});
 				showActivity = showActivity != undefined ? showActivity : (connection.show_activity || connection.showActivity);
@@ -197,6 +196,7 @@ module.exports = (_ => {
 									children: [
 										BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TextElement, {
 											className: BDFDB.disCN._spotifycontrolssong,
+											color: BDFDB.LibraryComponents.TextElement.Colors.PRIMARY,
 											children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TextScroller, {
 												children: lastSong.details
 											})
@@ -298,7 +298,7 @@ module.exports = (_ => {
 												type: "volume",
 												player: this,
 												icon: Math.ceil(currentVolume/34),
-												disabled: socketDevice.device.is_restricted,
+												disabled: socketDevice.device.is_restricted || !socketDevice.device.supports_volume,
 												onContextMenu: _ => {
 													if (currentVolume == 0) {
 														if (lastVolume) this.request(socketDevice.socket, socketDevice.device, "volume", {
@@ -358,6 +358,7 @@ module.exports = (_ => {
 		};
 		const SpotifyControlsButtonComponent = class SpotifyControlsButton extends BdApi.React.Component {
 			render() {
+				if (_this.settings.general.hideDisabled && this.props.disabled) return null;
 				let playerSize = this.props.player.props.maximized ? "big" : "small";
 				if (!playerSize || !_this.settings.buttons[this.props.type] || !_this.settings.buttons[this.props.type][playerSize]) return null;
 				let button = BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Button, BDFDB.ObjectUtils.exclude(Object.assign({}, this.props, {
@@ -378,7 +379,7 @@ module.exports = (_ => {
 					onOpen: _ => this.props.player.props.buttonStates.push(this.props.type),
 					onClose: _ => BDFDB.ArrayUtils.remove(this.props.player.props.buttonStates, this.props.type, true),
 					renderPopout: this.props.renderPopout
-				}) : button;
+				}, true) : button;
 			}
 		};
 		const SpotifyControlsTimelineComponent = class SpotifyControlsTimeline extends BdApi.React.Component {
@@ -429,11 +430,11 @@ module.exports = (_ => {
 							className: BDFDB.disCN._spotifycontrolsbartext,
 							children: [
 								BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TextElement, {
-									size: BDFDB.LibraryComponents.TextElement.Sizes.SIZE_12,
+									size: BDFDB.LibraryComponents.TextElement.Sizes.SIZE_10,
 									children: this.formatTime(currentTime)
 								}),
 								BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TextElement, {
-									size: BDFDB.LibraryComponents.TextElement.Sizes.SIZE_12,
+									size: BDFDB.LibraryComponents.TextElement.Sizes.SIZE_10,
 									children: this.formatTime(maxTime)
 								})
 							]
@@ -452,6 +453,7 @@ module.exports = (_ => {
 						addBy: 			{value: true,		description: "Adds the Word 'by' infront of the Author Name"},
 						addTimeline: 		{value: true,		description: "Shows the Song Timeline in the Controls"},
 						addActivityButton: 	{value: true,		description: "Shows the Activity Status Toggle Button in the Controls"},
+						hideDisabled: 		{value: false,		description: "Hides Buttons which are unclickable, (e.g. Volume on Mobile or Previous without Premium)"},
 						doubleBack: 		{value: true,		description: "Requires the User to press the Back Button twice to go to previous Track"}
 					},
 					buttons: {
@@ -487,7 +489,6 @@ module.exports = (_ => {
 						flex-direction: column;
 						justify-content: center;
 						min-height: 52px;
-						margin-bottom: 1px;
 						border-bottom: 1px solid var(--background-modifier-accent);
 						padding: 0 8px;
 						box-sizing: border-box;
@@ -512,10 +513,12 @@ module.exports = (_ => {
 						margin: 6px 0 4px 0;
 					}
 					${BDFDB.dotCN._spotifycontrolsbar} {
+						--bar-size: 4px;
+						--grabber-size: 12px;
 						position: relative;
 						border-radius: 2px;
 						background-color: rgba(79, 84, 92, 0.16);
-						height: 4px;
+						height: var(--bar-size);
 						margin-bottom: 4px;
 					}
 					${BDFDB.dotCN._spotifycontrolsbarfill} {
@@ -523,7 +526,7 @@ module.exports = (_ => {
 						height: 100%;
 						min-width: 4px;
 						border-radius: 2px;
-						background: var(--text-normal);
+						background: var(--text-secondary);
 					}
 					${BDFDB.dotCN._spotifycontrolstimeline}:hover ${BDFDB.dotCN._spotifycontrolsbarfill} {
 						background: var(--SC-spotify-green);
@@ -533,11 +536,11 @@ module.exports = (_ => {
 						position: absolute;
 						top: 0;
 						left: 0;
-						width: 8px;
-						height: 8px;
-						margin-top: -2px;
-						margin-left: -2px;
-						background: var(--text-normal);
+						width: var(--grabber-size);
+						height: var(--grabber-size);
+						margin-top: calc(-1 * (var(--grabber-size) - var(--bar-size)) / 2);
+						margin-left: calc(-1 * var(--grabber-size) / 2);
+						background: var(--text-secondary);
 						border-radius: 50%;
 					}
 					${BDFDB.dotCN._spotifycontrolstimeline}:hover ${BDFDB.dotCN._spotifycontrolsbargrabber} {
@@ -563,7 +566,7 @@ module.exports = (_ => {
 						display: block;
 						width: 100%;
 						height: 100%;
-						color: var(--header-primary);
+						color: var(--text-primary);
 						object-fit: cover;
 					}
 					${BDFDB.dotCN._spotifycontrolscovermaximizer} {
@@ -619,11 +622,6 @@ module.exports = (_ => {
 						width: 140px;
 						margin: 5px;
 					}
-					${BDFDB.dotCNS._spotifycontrolsvolumeslider + BDFDB.dotCN.slidergrabber} {
-						height: 10px;
-						margin-top: -6px;
-						border-radius: 50%;
-					}
 					${BDFDB.dotCNS._spotifycontrolscontainer + BDFDB.dotCN.accountinfobuttondisabled} {
 						cursor: no-drop;
 					}
@@ -665,21 +663,6 @@ module.exports = (_ => {
 					}
 					${BDFDB.dotCN._spotifycontrolssettingslabel} {
 						margin-left: 10px;
-					}
-					${BDFDB.dotCNS._bdminimalmode + BDFDB.dotCN._spotifycontrolsbar} {
-						height: 3px;
-					}
-					${BDFDB.dotCNS._bdminimalmode + BDFDB.dotCNS._spotifycontrolscontainer + BDFDB.dotCN.accountinfobutton} {
-						width: 26px;
-						height: 26px;
-					}
-					${BDFDB.dotCNS._bdminimalmode + BDFDB.dotCNS._spotifycontrolscontainer + BDFDB.dotCN.size14} {
-						font-size: 13px;
-						line-height: 13px;
-					}
-					${BDFDB.dotCNS._bdminimalmode + BDFDB.dotCNS._spotifycontrolscontainer + BDFDB.dotCN.size12} {
-						font-size: 11px;
-						line-height: 11px;
 					}
 				`;
 			}

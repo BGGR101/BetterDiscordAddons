@@ -2,7 +2,7 @@
  * @name TopRoleEverywhere
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 3.1.7
+ * @version 3.2.0
  * @description Adds the highest Role of a User as a Tag
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -82,10 +82,10 @@ module.exports = (_ => {
 				
 				this.modulePatches = {
 					before: [
-						"MessageUsername",
-						"NameContainer"
+						"MessageUsername"
 					],
 					after: [
+						"NameContainerDecorators",
 						"VoiceUser"
 					]
 				};
@@ -120,7 +120,7 @@ module.exports = (_ => {
 					${BDFDB.dotCN._toproleseverywhererolestyle} {
 						display: inline-flex;
 						margin: 0 0 0 0.3rem;
-						color: var(--text-normal)
+						color: var(--text-secondary)
 					}
 					${BDFDB.dotCNS._toproleseverywhererolestyle + BDFDB.dotCN.userrolecircle} {
 						flex: 0 0 auto;
@@ -173,10 +173,9 @@ module.exports = (_ => {
 				BDFDB.MessageUtils.rerenderAll();
 			}
 
-			processNameContainer (e) {
-				if (!this.settings.places.memberList) return;
-				let user = BDFDB.LibraryStores.UserStore.getUser(BDFDB.ReactUtils.findValue(e.instance.props.name, "userId"));
-				if (user) this.injectRoleTag(BDFDB.ObjectUtils.get(e.instance, "props.decorators.props.children"), user, "member", 3, {
+			processNameContainerDecorators (e) {
+				if (!this.settings.places.memberList || !e.instance.props.user) return;
+				this.injectRoleTag(e.returnvalue.props.children, e.instance.props.user, "member", 3, {
 					tagClass: BDFDB.disCN.bottagmember
 				});
 			}
@@ -215,7 +214,7 @@ module.exports = (_ => {
 				if (this.settings.general.showOwnerRole && user.id == guild.ownerId) role = Object.assign({}, role, {name: BDFDB.LanguageUtils.LanguageStrings.GUILD_OWNER, ownerRole: true});
 				if (role && !role.colorString && !this.settings.general.includeColorless && !role.ownerRole) {
 					let member = BDFDB.LibraryStores.GuildMemberStore.getMember(guild.id, user.id);
-					if (member) for (let sortedRole of BDFDB.ArrayUtils.keySort(member.roles.map(roleId => BDFDB.LibraryStores.GuildStore.getRole(guild.id, roleId)), "position").reverse()) if (sortedRole.colorString) {
+					if (member) for (let sortedRole of BDFDB.ArrayUtils.keySort(member.roles.map(roleId => BDFDB.LibraryStores.GuildRoleStore.getRole(guild.id, roleId)), "position").reverse()) if (sortedRole.colorString) {
 						role = sortedRole;
 						break;
 					}

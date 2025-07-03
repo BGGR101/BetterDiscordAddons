@@ -2,7 +2,7 @@
  * @name StaffTag
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.6.5
+ * @version 1.6.9
  * @description Adds a Crown/Tag to Server Owners (or Admins/Management)
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -96,10 +96,10 @@ module.exports = (_ => {
 				
 				this.modulePatches = {
 					before: [
-						"MessageUsername",
-						"NameContainer"
+						"MessageUsername"
 					],
 					after: [
+						"NameContainerDecorators",
 						"UserHeaderUsername",
 						"VoiceUser"
 					]
@@ -158,6 +158,9 @@ module.exports = (_ => {
 					}
 					${BDFDB.dotCN.memberownericon} {
 						top: 0px;
+					}
+					${BDFDB.dotCN.memberownericon} + ${BDFDB.dotCN.memberownericon} {
+						display: none;
 					}
 					${BDFDB.dotCNS.message + BDFDB.dotCN.memberownericon} {
 						top: 2px;
@@ -264,13 +267,12 @@ module.exports = (_ => {
 				BDFDB.MessageUtils.rerenderAll();
 			}
 
-			processNameContainer (e) {
-				let user = BDFDB.LibraryStores.UserStore.getUser(BDFDB.ReactUtils.findValue(e.instance.props.name, "userId"));
-				if (!user) return;
+			processNameContainerDecorators (e) {
+				if (!e.instance.props.user) return;
 				let channelId = e.instance.props.channel && e.instance.props.channel.id || BDFDB.LibraryStores.SelectedChannelStore.getChannelId();
-				let userType = this.getUserType(user, channelId);
+				let userType = this.getUserType(e.instance.props.user, channelId);
 				if (userType && this.settings.tagPlaces.memberList) {
-					this.injectStaffTag(BDFDB.ObjectUtils.get(e.instance, "props.decorators.props.children"), user, userType, 1, {
+					this.injectStaffTag(e.returnvalue.props.children, e.instance.props.user, userType, 1, {
 						channelId: channelId,
 						tagClass: BDFDB.disCN.bottagmember
 					});
@@ -322,7 +324,8 @@ module.exports = (_ => {
 			}
 			
 			processUserHeaderUsername (e) {
-				if (!e.instance.props.user || e.instance.props.profileType == BDFDB.DiscordConstants.ProfileTypes.BITE_SIZE && !this.settings.tagPlaces.userPopout || e.instance.props.profileType == BDFDB.DiscordConstants.ProfileTypes.FULL_SIZE && !this.settings.tagPlaces.userProfile) return;
+				let themeType = BDFDB.ObjectUtils.get(e.instance, "props.tags.props.themeType");
+				if (!e.instance.props.user || (themeType == BDFDB.DiscordConstants.ProfileTypes.POPOUT || themeType == BDFDB.DiscordConstants.ProfileTypes.SIDEBAR) && !this.settings.tagPlaces.userPopout || (themeType == BDFDB.DiscordConstants.ProfileTypes.MODAL || themeType == BDFDB.DiscordConstants.ProfileTypes.MODAL_V2) && !this.settings.tagPlaces.userProfile) return;
 				let userType = this.getUserType(e.instance.props.user, e.instance.props.channel && e.instance.props.channel.id);
 				if (!userType) return;
 				let [children, index] = BDFDB.ReactUtils.findParent(e.returnvalue, {props: [["className", BDFDB.disCN.userheadernickname]]});

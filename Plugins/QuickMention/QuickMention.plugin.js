@@ -2,7 +2,7 @@
  * @name QuickMention
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.0.8
+ * @version 1.0.9
  * @description Adds a Mention Button to the Message 3-Dot Menu
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -14,7 +14,9 @@
 
 module.exports = (_ => {
 	const changeLog = {
-		
+		"improved": {
+			"Message Actions": "Button is back in the Message Actions Toolbar"
+		}
 	};
 
 	return !window.BDFDB_Global || (!window.BDFDB_Global.loaded && !window.BDFDB_Global.started) ? class {
@@ -56,13 +58,19 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
 	} : (([Plugin, BDFDB]) => {
 		return class QuickMention extends Plugin {
-			onLoad () {}
+			onLoad () {
+				this.modulePatches = {
+					after: [
+						"MessageButtons"
+					]
+				};
+			}
 			
 			onStart () {
 				BDFDB.PatchUtils.patch(this, BDFDB.LibraryModules.MessageToolbarUtils, "useMessageMenu", {after: e => {
@@ -100,6 +108,30 @@ module.exports = (_ => {
 						})
 					}));
 				}
+			}
+			
+			processMessageButtons (e) {
+				let [children, index] = BDFDB.ReactUtils.findParent(e.returnvalue, {props: [["className", BDFDB.disCN.messagebuttons]]});
+				if (index == -1) return;
+				children.unshift(BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TooltipContainer, {
+					key: "mention",
+					text: BDFDB.LanguageUtils.LanguageStrings.MENTION,
+					tooltipConfig: {className: BDFDB.disCN.messagetoolbartooltip},
+					children: BDFDB.ReactUtils.createElement("div", {
+						className: BDFDB.disCNS.messagetoolbarhoverbutton + BDFDB.disCN.messagetoolbarbutton,
+						onClick: _ => BDFDB.LibraryModules.DispatchUtils.ComponentDispatch.dispatchToLastSubscribed(BDFDB.DiscordConstants.ComponentActions.INSERT_TEXT, {
+							plainText: `<@!${e.instance.props.message.author.id}>`
+						}),
+						children: BDFDB.ReactUtils.createElement("div", {
+							className: BDFDB.disCNS.messagetoolbaricon + BDFDB.disCN.messagetoolbarbuttoncontent,
+							children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SvgIcon, {
+								className: BDFDB.disCN.messagetoolbaricon,
+								nativeClass: true,
+								name: BDFDB.LibraryComponents.SvgIcon.Names.NOVA_AT
+							})
+						})
+					})
+				}));
 			}
 		};
 	})(window.BDFDB_Global.PluginUtils.buildPlugin(changeLog));
