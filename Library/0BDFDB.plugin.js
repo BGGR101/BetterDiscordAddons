@@ -2,7 +2,7 @@
  * @name BDFDB
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 4.2.0
+ * @version 4.2.3
  * @description Required Library for DevilBro's Plugins
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -2089,8 +2089,8 @@ module.exports = (_ => {
 												className: BDFDB.DOMUtils.formatClassName(BDFDB.disCN.tooltipguildnametext),
 												children: fontColorIsGradient ? BDFDB.ReactUtils.createElement(Internal.LibraryComponents.TextGradientElement, {
 													gradient: BDFDB.ColorUtils.createGradient(config.fontColor),
-													children: config.guild.toString()
-												}) : config.guild.toString()
+													children: config.guild.name
+												}) : config.guild.name
 											}),
 										]
 									}),
@@ -3189,10 +3189,10 @@ module.exports = (_ => {
 					let keys = Object.keys(guild);
 					return guild instanceof Internal.DiscordObjects.Guild || Object.keys(new Internal.DiscordObjects.Guild({})).every(key => keys.indexOf(key) > -1);
 				};
-				BDFDB.GuildUtils.getIcon = function (id) {
+				BDFDB.GuildUtils.getIcon = function (id, size, canAnimate) {
 					let guild = Internal.LibraryStores.GuildStore.getGuild(id);
 					if (!guild || !guild.icon) return "";
-					return Internal.LibraryModules.IconUtils.getGuildIconURL(guild).split("?")[0];
+					return size ? Internal.LibraryModules.IconUtils.getGuildIconURL({id, size, canAnimate, icon: guild.icon}) : Internal.LibraryModules.IconUtils.getGuildIconURL({id, size, canAnimate, icon: guild.icon}).split("?")[0];
 				};
 				BDFDB.GuildUtils.getBanner = function (id) {
 					let guild = Internal.LibraryStores.GuildStore.getGuild(id);
@@ -7783,7 +7783,7 @@ module.exports = (_ => {
 						let color = this.props.color != undefined ? this.props.color && Internal.DiscordConstants.ColorsCSS[this.props.color] : Internal.DiscordConstants.ColorsCSS[CustomComponents.TextElement.Colors.STANDARD];
 						return BDFDB.ReactUtils.createElement(Internal.LibraryComponents.Text, {
 							className: this.props.className,
-							variant: `${this.props.size || CustomComponents.TextElement.Sizes.SIZE_12}/${this.props.weight || "normal"}`,
+							variant: `${this.props.size || CustomComponents.TextElement.Sizes.SIZE_14}/${this.props.weight || "normal"}`,
 							style: color ? {color: color} : {},
 							color: "",
 							children: this.props.children
