@@ -2,7 +2,7 @@
  * @name FriendNotifications
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 2.1.2
+ * @version 2.1.4
  * @description Shows a Notification when a Friend or a User, you choose to observe, changes their Status
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -71,17 +71,17 @@ module.exports = (_ => {
 		const statuses = {
 			online: {
 				value: true,
-				name: "STATUS_ONLINE",
+				name: "ONLINE",
 				sound: true
 			},
 			idle: {
 				value: false,
-				name: "STATUS_IDLE",
+				name: "IDLE",
 				sound: true
 			},
 			dnd: {
 				value: false,
-				name: "STATUS_DND",
+				name: "DO_NOT_DISTURB",
 				sound: true
 			},
 			playing: {
@@ -109,7 +109,7 @@ module.exports = (_ => {
 			},
 			offline: {
 				value: true,
-				name: "STATUS_OFFLINE",
+				name: "OFFLINE",
 				sound: true
 			},
 			login: {
@@ -152,7 +152,7 @@ module.exports = (_ => {
 					className: BDFDB.disCNS.guildouter + BDFDB.disCN._friendnotificationsfriendsonlinewrap,
 					children: BDFDB.ReactUtils.createElement("div", {
 						className: BDFDB.disCNS.guildslabel + BDFDB.disCN._friendnotificationsfriendsonline,
-						children: BDFDB.LanguageUtils.LanguageStringsFormat("FRIENDS_ONLINE_HEADER", this.props.amount),
+						children: BDFDB.LanguageUtils.LanguageStringsFormat("ONLINE_PLACEHOLDER", this.props.amount),
 						onClick: _ => _this.showTimeLog()
 					})
 				});
@@ -215,7 +215,6 @@ module.exports = (_ => {
 				this.defaults = {
 					general: {
 						addOnlineCount:			{value: true, 			description: "Adds an Online Friend Counter to the Server List (Click to open Time Log)"},
-						showDiscriminator:		{value: false, 			description: "Adds the User Discriminator"},
 						showTimestamp:			{value: false, 			description: "Adds the Timestamp"},
 						muteOnDND:			{value: false, 			description: "Does not notify you when you are in DnD Status"},
 						openOnClick:			{value: false, 			description: "Opens the DM when you click a Notification"}
@@ -583,7 +582,7 @@ module.exports = (_ => {
 								children: [
 									BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Flex.Child, {
 										children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TextInput, {
-											placeholder: "user (id, accountname or name#discriminator)",
+											placeholder: "user (id or accountname)",
 											value: "",
 											onChange: value => strangerId = value
 										})
@@ -861,8 +860,8 @@ module.exports = (_ => {
 							let string = this.settings.notificationStrings[specialNotice ? specialNotice : customChanged ? "custom" : loginNotice ? "login" : status.name] || "'$user' changed status to '$status'";
 							let hasUserPlaceholder = string.indexOf("$user") > -1;
 							let toastString = BDFDB.StringUtils.htmlEscape(string)
-								.replace(/'{0,1}\$user'{0,1}/g, `<strong>${BDFDB.StringUtils.htmlEscape(name)}</strong>${this.settings.general.showDiscriminator && !user.isPomelo() ? ("#" + user.discriminator) : ""}`)
-								.replace(/'{0,1}\$nick'{0,1}/g, nickname ? `<strong>${BDFDB.StringUtils.htmlEscape(nickname)}</strong>${!hasUserPlaceholder && this.settings.general.showDiscriminator && !user.isPomelo() ? ("#" + user.discriminator) : ""}` : !hasUserPlaceholder ? `<strong>${BDFDB.StringUtils.htmlEscape(name)}</strong>${this.settings.general.showDiscriminator && user.discriminator && user.discriminator != "0" ? ("#" + user.discriminator) : ""}` : "")
+								.replace(/'{0,1}\$user'{0,1}/g, `<strong>${BDFDB.StringUtils.htmlEscape(name)}</strong>`)
+								.replace(/'{0,1}\$nick'{0,1}/g, nickname ? `<strong>${BDFDB.StringUtils.htmlEscape(nickname)}</strong>` : !hasUserPlaceholder ? `<strong>${BDFDB.StringUtils.htmlEscape(name)}</strong>` : "")
 								.replace(/'{0,1}\$statusOld'{0,1}/g, `<strong>${oldStatusName}</strong>`)
 								.replace(/'{0,1}\$status'{0,1}/g, `<strong>${statusName}</strong>`);
 							if (status.activity) {
@@ -899,7 +898,7 @@ module.exports = (_ => {
 									}
 								};
 								if ((loginNotice ? observedUsers[id].login : observedUsers[id][status.name]) == notificationTypes.DESKTOP.value) {
-									let desktopString = string.replace(/\$user/g, `${name}${this.settings.general.showDiscriminator ? ("#" + user.discriminator) : ""}`).replace(/\$statusOld/g, oldStatusName).replace(/\$status/g, statusName);
+									let desktopString = string.replace(/\$user/g, name).replace(/\$statusOld/g, oldStatusName).replace(/\$status/g, statusName);
 									if (status.activity) desktopString = desktopString.replace(/\$song|\$game/g, status.activity.name || status.activity.details || "").replace(/\$artist|\$custom/g, [status.activity.emoji && status.activity.emoji.name, status.activity.state].filter(n => n).join(" ") || "");
 									if (status.mobile) desktopString += " (mobile)";
 									let notificationSound = this.settings.notificationSounds["desktop" + status.name] || {};
@@ -971,7 +970,7 @@ module.exports = (_ => {
 							size: BDFDB.LibraryComponents.Button.Sizes.TINY,
 							look: BDFDB.LibraryComponents.Button.Looks.OUTLINE,
 							style: {marginLeft: 6, marginRight: 12},
-							children: BDFDB.LanguageUtils.LanguageStrings.BUILD_OVERRIDE_CLEAR,
+							children: BDFDB.LanguageUtils.LanguageStrings.CLEAR,
 							onClick: _ => BDFDB.ModalUtils.confirm(this, this.labels.clear_log, _ => {
 								timeLog = [];
 								timeLogList.props.entries = timeLog;

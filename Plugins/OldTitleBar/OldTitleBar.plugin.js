@@ -2,7 +2,7 @@
  * @name OldTitleBar
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.8.7
+ * @version 1.9.0
  * @description Allows you to switch to Discord's old Titlebar
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -102,7 +102,7 @@ module.exports = (_ => {
 				if (_this.settings.general.reloadButton) {
 					if (children.length) children.unshift(BDFDB.ReactUtils.createElement("div", {className: BDFDB.disCN.channelheaderdivider}));
 					children.unshift(BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TooltipContainer, {
-						text: BDFDB.LanguageUtils.LanguageStrings.ERRORS_RELOAD,
+						text: BDFDB.LanguageUtils.LanguageStrings.RELOAD,
 						tooltipConfig: {type: "bottom"},
 						children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Clickable, {
 							className: BDFDB.disCNS.channelheadericonwrapper + BDFDB.disCN.channelheadericonclickable,
@@ -155,9 +155,7 @@ module.exports = (_ => {
 						--custom-app-top-bar-height: 0px;
 					}
 					${BDFDB.dotCNS._oldtitlebarenabled + BDFDB.dotCN.titlebar},
-					${BDFDB.dotCNS._oldtitlebarenabled + BDFDB.dotCN.titlebarthick},
-					${BDFDB.dotCNS._oldtitlebarenabled + BDFDB.dotCN.authboxcharacterbackground}:before,
-					${BDFDB.dotCNS._oldtitlebarenabled + BDFDB.dotCN.authboxsplashbackground}:before {
+					${BDFDB.dotCNS._oldtitlebarenabled + BDFDB.dotCN.titlebarthick} {
 						display: none !important;
 					}
 					
@@ -195,7 +193,14 @@ module.exports = (_ => {
 						transform: scale(90%);
 					}
 					
-					${BDFDB.dotCNS.chatthreadsidebaropen} > *:first-child ${BDFDB.dotCN._oldtitlebartoolbar} {
+					${BDFDB.dotCN._oldtitlebarextrabuttons} {
+						display: flex;
+						gap: 5px;
+						align-items: center;
+					}
+					
+					${BDFDB.dotCN.chatthreadsidebaropen} > *:first-child ${BDFDB.dotCN._oldtitlebartoolbar},
+					${BDFDB.dotCN.chatthreadsidebaropen} ~ * ${BDFDB.dotCN._oldtitlebarextrabuttons} {
 						display: none !important;
 					}
 
@@ -210,13 +215,6 @@ module.exports = (_ => {
 					}
 					.platform-win ${BDFDB.dotCN._oldtitlebarsettingstoolbar} {
 						top: 22px;
-					}
-					
-					${BDFDB.dotCNS._oldtitlebarenabled + BDFDB.dotCNS.authboxcharacterbackground + BDFDB.dotCN._oldtitlebarsettingstoolbar},
-					${BDFDB.dotCNS._oldtitlebarenabled + BDFDB.dotCNS.authboxsplashbackground + BDFDB.dotCN._oldtitlebarsettingstoolbar} {
-						background: rgba(0, 0, 0, 0.3);
-						border-radius: 0 0 0 5px;
-						top: 0;
 					}
 
 					${BDFDB.dotCN.channelheaderheaderbar},
@@ -296,7 +294,10 @@ module.exports = (_ => {
 						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Flex, {children})
 					];
 				}
-				children.push(titleBarButton);
+				if (titleBarButton) children.push(BDFDB.ReactUtils.createElement("div", {
+					className: BDFDB.disCN._oldtitlebarextrabuttons,
+					children: titleBarButton
+				}));
 				this.injectButtons(children, true);
 			}
 

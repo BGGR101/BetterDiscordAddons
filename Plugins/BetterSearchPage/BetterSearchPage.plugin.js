@@ -2,7 +2,7 @@
  * @name BetterSearchPage
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.2.7
+ * @version 1.2.8
  * @description Makes the Controls in the Search Results Page sticky
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -95,8 +95,9 @@ module.exports = (_ => {
 				if (!e.instance.props.search) return;
 				let [children, index] = BDFDB.ReactUtils.findParent(e.returnvalue, {name: "SearchResultsHeader"});
 				if (index == -1) return;
-				children.splice(index + 1, 0, BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SearchResultsPagination, {
-					onPageChange: newPage => !e.instance.props.search.searching && BDFDB.LibraryModules.SearchPageUtils.changePage(e.instance.props.searchId, newPage),
+				let onPageChange = BDFDB.ReactUtils.findValue(e.returnvalue, "onPageChange");
+				if (onPageChange) children.splice(index + 1, 0, BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SearchResultsPagination, {
+					onPageChange: newPage => !e.instance.props.search.searching && onPageChange(newPage),
 					offset: e.instance.props.search.offset,
 					totalCount: e.instance.props.search.totalResults,
 					pageSize: BDFDB.DiscordConstants.SEARCH_PAGE_SIZE

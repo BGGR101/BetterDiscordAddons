@@ -2,7 +2,7 @@
  * @name ServerDetails
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.3.0
+ * @version 1.3.4
  * @description Shows Server Details in the Server List Tooltip
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -85,8 +85,6 @@ module.exports = (_ => {
 				if (_this.settings.general.onlyShowOnShift) {
 					let addListener = expanded => {
 						let triggered = false, listener = event => {
-							if (!this.updater.isMounted(this)) return document.removeEventListener(expanded ? "keyup" : "keydown", listener);
-							if (triggered) return;
 							if (event.which != 16 || triggered) return;
 							triggered = true;
 							document.removeEventListener(expanded ? "keyup" : "keydown", listener);
@@ -120,7 +118,7 @@ module.exports = (_ => {
 				}
 				else {
 					let src = BDFDB.GuildUtils.getIcon(this.props.guild.id, 4096, this.props.guild.icon && BDFDB.LibraryModules.IconUtils.isAnimatedIconHash(this.props.guild.icon));
-					let roles = this.props.guild.roles || BDFDB.LibraryStores.GuildRoleStore.getRoles(this.props.guild.id);
+					let roles = BDFDB.LibraryStores.GuildRoleStore.getSortedRoles(this.props.guild.id);
 					return BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Flex, {
 						direction: BDFDB.LibraryComponents.Flex.Direction.VERTICAL,
 						align: BDFDB.LibraryComponents.Flex.Align.CENTER,
@@ -133,8 +131,8 @@ module.exports = (_ => {
 								children: this.props.guild.acronym
 							})),
 							_this.settings.items.owner && BDFDB.ReactUtils.createElement(GuildDetailsRowComponent, {
-								prefix: BDFDB.LanguageUtils.LanguageStrings.GUILD_OWNER,
-								string: !owner ? BDFDB.LanguageUtils.LanguageStrings.UNKNOWN_USER : (owner.isPomelo() ? owner.username : `${owner.username}#${owner.discriminator}`)
+								prefix: BDFDB.LanguageUtils.LanguageStrings.SERVER_OWNER,
+								string: !owner ? BDFDB.LanguageUtils.LanguageStrings.UNKNOWN_USER : owner.username
 							}),
 							_this.settings.items.creationDate && BDFDB.ReactUtils.createElement(GuildDetailsRowComponent, {
 								prefix: _this.labels.creation_date,
@@ -156,9 +154,9 @@ module.exports = (_ => {
 								prefix: BDFDB.LanguageUtils.LanguageStrings.CHANNELS,
 								string: BDFDB.LibraryStores.GuildChannelStore.getChannels(this.props.guild.id).count
 							}),
-							_this.settings.items.roles && roles && BDFDB.ReactUtils.createElement(GuildDetailsRowComponent, {
+							_this.settings.items.roles && roles && roles.length && BDFDB.ReactUtils.createElement(GuildDetailsRowComponent, {
 								prefix: BDFDB.LanguageUtils.LanguageStrings.ROLES,
-								string: Object.keys(BDFDB.ObjectUtils.filter(roles, n => n.id != this.props.guild.id)).length
+								string: roles.filter(n => n.id != this.props.guild.id).length
 							}),
 							_this.settings.items.language && BDFDB.ReactUtils.createElement(GuildDetailsRowComponent, {
 								prefix: BDFDB.LanguageUtils.LanguageStrings.LANGUAGE,
@@ -195,7 +193,7 @@ module.exports = (_ => {
 					},
 					items: {
 						icon:			{value: true, 	description: "icon"},
-						owner:			{value: true, 	description: "GUILD_OWNER"},
+						owner:			{value: true, 	description: "SERVER_OWNER"},
 						creationDate:		{value: true, 	description: "creation_date"},
 						joinDate:		{value: true, 	description: "join_date"},
 						members:		{value: true, 	description: "MEMBERS"},
@@ -230,6 +228,8 @@ module.exports = (_ => {
 						flex-direction: column;
 						justify-content: center;
 						align-items: center;
+						max-width: unset;
+						word-wrap: unset;
 					}
 					${BDFDB.dotCNS._serverdetailstooltip + BDFDB.dotCN._serverdetailsicon} {
 						display: flex;
@@ -241,7 +241,7 @@ module.exports = (_ => {
 					}
 					${BDFDB.dotCN._serverdetailstooltip} div${BDFDB.dotCN._serverdetailsicon} {
 						background-color: var(--background-base-low);
-						color: var(--text-secondary);
+						color: var(--text-subtle);
 						font-size: 40px;
 					}
 				`;

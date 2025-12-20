@@ -2,7 +2,7 @@
  * @name EditUsers
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 5.0.6
+ * @version 5.0.9
  * @description Allows you to locally edit Users
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -182,12 +182,6 @@ module.exports = (_ => {
 					${BDFDB.dotCNS.bottag + BDFDB.dotCN.emojiold} + span {
 						margin-left: 2px;
 					}
-					${BDFDB.dotCNS.peoplesuser + BDFDB.dotCN.peoplesdiscriminator} {
-						display: none;
-					}
-					${BDFDB.dotCNS.peoplesuserhovered + BDFDB.dotCN.peoplesdiscriminator} {
-						display: block;
-					}
 					${BDFDB.dotCNS.userheaderclickableusername + BDFDB.dotCN.userheadernickname}:has(span) {
 						text-decoration: unset !important;
 					}
@@ -203,7 +197,7 @@ module.exports = (_ => {
 					${BDFDB.dotCN.messagemarkup} span[style*="linear-gradient"] code.inline,
 					${BDFDB.dotCN.messagemarkup} span[style*="linear-gradient"] blockquote,
 					${BDFDB.dotCN.messagemarkup} span[style*="linear-gradient"] ${BDFDB.dotCN.spoilertext} {
-						color: var(--text-secondary);
+						color: var(--text-subtle);
 					}
 					${BDFDB.dotCN.mention}[style*="--edited-mention-color"] {
 						background-color: rgba(var(--edited-mention-color), .1) !important;
@@ -219,11 +213,16 @@ module.exports = (_ => {
 			onStart () {
 				appTitleObserver = new MutationObserver(_ => this.changeAppTitle());
 				appTitleObserver.observe(document.head.querySelector("title"), {childList: true});
-			
+				
 				BDFDB.PatchUtils.patch(this, BDFDB.LibraryModules.UserNameUtils, "getName", {after: e => {
 					if (e.methodArguments[2] && changedUsers[e.methodArguments[2].id] && changedUsers[e.methodArguments[2].id].name) return changedUsers[e.methodArguments[2].id].name;
 				}});
-			
+				
+				BDFDB.PatchUtils.patch(this, BDFDB.LibraryModules.AvatarUtils, "getAvatarProps", {after: e => {
+					let data = changedUsers[e.methodArguments[0].userId];
+					if (data && e.returnValue) e.returnValue.avatarSrc = data.removeIcon ? "" : data.url || e.returnValue.avatarSrc;
+				}});
+				
 				BDFDB.PatchUtils.patch(this, BDFDB.LibraryStores.StageChannelParticipantStore, "getMutableParticipants", {after: e => {
 					if (BDFDB.ArrayUtils.is(e.returnValue)) for (let i in e.returnValue) {
 						if (e.returnValue[i] && e.returnValue[i].user && changedUsers[e.returnValue[i].user.id]) e.returnValue[i] = Object.assign({}, e.returnValue[i], {user: this.getUserData(e.returnValue[i].user.id)});
@@ -420,9 +419,9 @@ module.exports = (_ => {
 						let userData = this.getUserData(user.id);
 						if (userData.globalName && userData.globalName != user.globalName || !userData.globalName && userData.username != user.username) {
 							let [muteChildren, muteIndex] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: "mute-channel"});
-							if (muteIndex > -1) muteChildren[muteIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("MUTE_CHANNEL", `@${userData.globalName || userData.username}`);
+							if (muteIndex > -1) muteChildren[muteIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("MUTE_PLACEHOLDER", `@${userData.globalName || userData.username}`);
 							let [unmuteChildren, unmuteIndex] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: "unmute-channel"});
-							if (unmuteIndex > -1) unmuteChildren[unmuteIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("UNMUTE_CHANNEL", `@${userData.globalName || userData.username}`);
+							if (unmuteIndex > -1) unmuteChildren[unmuteIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("UNMUTE_PLACEHOLDER", `@${userData.globalName || userData.username}`);
 						}
 					}
 				}
@@ -432,13 +431,13 @@ module.exports = (_ => {
 						if (userData.globalName && userData.globalName != e.instance.props.user.globalName || !userData.globalName && userData.username != e.instance.props.user.username) {
 							let username = userData.globalName || userData.username;
 							let [timeoutChildren, timeoutIndex] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: "timeout"});
-							if (timeoutIndex > -1) timeoutChildren[timeoutIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("DISABLE_GUILD_COMMUNICATION_FOR_USER", username);
+							if (timeoutIndex > -1) timeoutChildren[timeoutIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("TIMEOUT_PLACEHOLDER", username);
 							let [removeTimeoutChildren, removeTimeoutIndex] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: "removetimeout"});
-							if (removeTimeoutIndex > -1) removeTimeoutChildren[removeTimeoutIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("ENABLE_GUILD_COMMUNICATION_FOR_USER", username);
+							if (removeTimeoutIndex > -1) removeTimeoutChildren[removeTimeoutIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("REMOVE_TIMEOUT_FROM_PLACEHOLDER", username);
 							let [kickChildren, kickIndex] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: "kick"});
-							if (kickIndex > -1) kickChildren[kickIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("KICK_USER", username);
+							if (kickIndex > -1) kickChildren[kickIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("KICK_PLACEHOLDER", username);
 							let [banChildren, banIndex] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: "ban"});
-							if (banIndex > -1) banChildren[banIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("BAN_USER", username);
+							if (banIndex > -1) banChildren[banIndex].props.label = BDFDB.LanguageUtils.LanguageStringsFormat("BAN_PLACEHOLDER", username);
 						}
 					}
 					let [children, index] = BDFDB.ContextMenuUtils.findItem(e.returnvalue, {id: "devmode-copy-id", group: true});
@@ -477,7 +476,7 @@ module.exports = (_ => {
 			processChannelTextAreaEditor (e) {
 				if (!e.instance.props.disabled && e.instance.props.channel && e.instance.props.channel.isDM() && (e.instance.props.type == BDFDB.DiscordConstants.ChannelTextAreaTypes.NORMAL) && this.settings.places.chatTextarea) {
 					let user = BDFDB.LibraryStores.UserStore.getUser(e.instance.props.channel.recipients[0]);
-					if (user) e.instance.props.placeholder = BDFDB.LanguageUtils.LanguageStringsFormat("TEXTAREA_PLACEHOLDER", `@${changedUsers[user.id] && changedUsers[user.id].name || user.globalName || user.username}`);
+					if (user) e.instance.props.placeholder = BDFDB.LanguageUtils.LanguageStringsFormat("SEND_A_MESSAGE_IN_PLACEHOLDER", `@${changedUsers[user.id] && changedUsers[user.id].name || user.globalName || user.username}`);
 				}
 			}
 
@@ -589,9 +588,9 @@ module.exports = (_ => {
 			
 			processUserHeaderAvatar (e) {
 				if (!e.instance.props.user || !changedUsers[e.instance.props.user.id] || e.instance.props.themeType == BDFDB.DiscordConstants.ProfileTypes.SIDEBAR && !this.settings.places.userPanel || e.instance.props.themeType == BDFDB.DiscordConstants.ProfileTypes.POPOUT && !this.settings.places.userPopout || (e.instance.props.themeType == BDFDB.DiscordConstants.ProfileTypes.MODAL || e.instance.props.themeType == BDFDB.DiscordConstants.ProfileTypes.MODAL_V2) && !this.settings.places.userProfile) return;
-				let data = changedUsers[e.instance.props.user.id];
 				e.instance.props.user = this.getUserData(e.instance.props.user.id, true, true);
 				if (e.instance.props.displayProfile) {
+					let data = changedUsers[e.instance.props.user.id];
 					if (data.removeBanner) e.instance.props.displayProfile.banner = null;
 					else if (data.banner) {
 						e.instance.props.displayProfile = BDFDB.ObjectUtils.copy(e.instance.props.displayProfile);
@@ -734,6 +733,14 @@ module.exports = (_ => {
 							}, "Error in Children Render of Account Button!", this);
 						}
 					};
+					if (e.returnvalue.props.children && e.returnvalue.props.children[0] && e.returnvalue.props.children[0].props && typeof e.returnvalue.props.children[0].props.children == "function") {
+						let childrenRender = e.returnvalue.props.children[0].props.children;
+						e.returnvalue.props.children[0].props.children = BDFDB.TimeUtils.suppress((...args) => {
+							let renderedChildren = childrenRender(...args);
+							changeAccountName(renderedChildren);
+							return renderedChildren;
+						}, "Error in Children Render in Account!", this);
+					}
 					if (typeof e.returnvalue.props.children == "function") {
 						let childrenRender = e.returnvalue.props.children;
 						e.returnvalue.props.children = BDFDB.TimeUtils.suppress((...args) => {
@@ -742,7 +749,7 @@ module.exports = (_ => {
 							return renderedChildren;
 						}, "Error in Children Render in Account!", this);
 					}
-					else changeAccountName(children[index]);
+					else changeAccountName(e.returnvalue.props.children);
 				}
 			}
 
@@ -1026,19 +1033,6 @@ module.exports = (_ => {
 				let data = changedUsers[e.instance.props.user.id];
 				if (data) {
 					let member = BDFDB.LibraryStores.GuildMemberStore.getMember(e.instance.props.channel.guild_id, e.instance.props.user.id);
-					if (data.color1) {
-						if (BDFDB.LibraryStores.AccessibilityStore.roleStyle != "dot") {
-							e.instance.props.colorString = null;
-							if (e.instance.props.colorStrings) for (let key in e.instance.props.colorStrings) e.instance.props.colorStrings[key] = null;
-						}
-						else {
-							let color1 = data.color1 && data.useRoleColor && (member || {}).colorString || data.color1;
-							if (color1) {
-								e.instance.props.colorString = BDFDB.ColorUtils.convert(BDFDB.ObjectUtils.is(color1) ? color1[0] : color1, "HEX");
-								if (e.instance.props.colorStrings) e.instance.props.colorStrings.primaryColor = e.instance.props.colorString;
-							}
-						}
-					}
 					if (data.name) {
 						e.instance.props.nick = this.getUserNick(e.instance.props.user.id, member && member.nick || e.instance.props.user.globalName);
 					}
@@ -1116,15 +1110,8 @@ module.exports = (_ => {
 				if (!recipientId || !changedUsers[recipientId]) return;
 				let userData = this.getUserData(recipientId);
 				e.instance.props.channelName = userData.globalName || userData.username;
-				let avatar = BDFDB.ReactUtils.findChild(e.returnvalue, {filter: c => c && c.props && !isNaN(parseInt(c.props.id))});
-				if (avatar && typeof avatar.props.children == "function") {
-					let childrenRender = avatar.props.children;
-					avatar.props.children = BDFDB.TimeUtils.suppress((...args) => {
-						let renderedChildren = childrenRender(...args);
-						if (renderedChildren && renderedChildren.props) renderedChildren.props.icon = this.getUserAvatar(recipientId);
-						return renderedChildren;
-					}, "Error in Avatar Render of DirectMessage!", this);
-				}
+				let avatar = BDFDB.ReactUtils.findChild(e.returnvalue, {filter: c => c && c.props && c.props.icon});
+				if (avatar) avatar.props.icon = this.getUserAvatar(recipientId);
 			}
 			
 			processPrivateChannel (e) {
@@ -1158,7 +1145,6 @@ module.exports = (_ => {
 				let userData = this.getUserData(instance.props.user.id);
 				wrapper.props.name = BDFDB.ReactUtils.createElement("span", {children: userData.globalName || userData.username});
 				this.changeUserColor(wrapper.props.name, instance.props.user.id, {modify: BDFDB.ObjectUtils.extract(Object.assign({}, instance.props, instance.state), "hovered", "selected", "hasUnreadMessages", "muted")});
-				if (wrapper.props.avatar) wrapper.props.avatar.props.src = this.getUserAvatar(instance.props.user.id);
 				wrapper.props.decorators = [wrapper.props.decorators].flat(10);
 				this.injectBadge(wrapper.props.decorators, instance.props.user.id, null, 1);
 			}
@@ -1168,7 +1154,7 @@ module.exports = (_ => {
 				for (let id in changedUsers) if (changedUsers[id] && changedUsers[id].name && changedUsers[id].name.toLocaleLowerCase().indexOf(e.instance.props.query.toLocaleLowerCase()) > -1 && !e.instance.props.results.find(n => n.record && n.record.id == id && n.type == BDFDB.DiscordConstants.AutocompleterResultTypes.USER)) {
 					let user = BDFDB.LibraryStores.UserStore.getUser(id);
 					if (user) e.instance.props.results.splice(1, 0, {
-						comparator: user.isPomelo() ? user.username : `${user.username}#${user.discriminator}`,
+						comparator: user.username,
 						record: user,
 						score: 30000,
 						type: BDFDB.DiscordConstants.AutocompleterResultTypes.USER
@@ -1343,7 +1329,7 @@ module.exports = (_ => {
 					if (url) {
 						newUserObject.avatar = url;
 						newUserObject.avatarURL = url;
-						newUserObject.getAvatarSource = _ => url;
+						newUserObject.getAvatarSource = _ => {uri: url};
 						newUserObject.getAvatarURL = _ => url;
 						newUserObject.guildMemberAvatars = {};
 					}
@@ -1716,7 +1702,7 @@ module.exports = (_ => {
 							]
 						}),
 						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.ModalComponents.ModalTabContent, {
-							tab: BDFDB.LanguageUtils.LanguageStrings.USER_SETTINGS_PROFILE_THEME,
+							tab: BDFDB.LanguageUtils.LanguageStrings.PROFILE_THEME,
 							children: [
 								BDFDB.ReactUtils.createElement("div", {
 									className: BDFDB.disCN.marginbottom20,
@@ -1729,7 +1715,7 @@ module.exports = (_ => {
 												BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.FormTitle.Title, {
 													className: BDFDB.disCN.marginreset,
 													tag: BDFDB.LibraryComponents.FormTitle.Tags.H5,
-													children: BDFDB.LanguageUtils.LanguageStrings.USER_SETTINGS_PROFILE_BANNER
+													children: BDFDB.LanguageUtils.LanguageStrings.PROFILE_BANNER
 												}),
 												BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SettingsItem, {
 													type: "Switch",
@@ -1765,7 +1751,7 @@ module.exports = (_ => {
 									]
 								}),
 								BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.FormItem, {
-									title: BDFDB.LanguageUtils.LanguageStrings.USER_SETTINGS_BANNER_COLOR_TITLE,
+									title: BDFDB.LanguageUtils.LanguageStrings.BANNER_COLOR,
 									className: BDFDB.disCN.marginbottom20,
 									children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.ColorSwatches, {
 										color: data.color5,
@@ -1778,7 +1764,7 @@ module.exports = (_ => {
 									})
 								}),
 								BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.FormItem, {
-									title: BDFDB.LanguageUtils.LanguageStrings.USER_SETTINGS_PROFILE_THEME_PRIMARY,
+									title: BDFDB.LanguageUtils.LanguageStrings.PRIMARY,
 									className: BDFDB.disCN.marginbottom20,
 									children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.ColorSwatches, {
 										color: data.color6,
@@ -1791,7 +1777,7 @@ module.exports = (_ => {
 									})
 								}),
 								BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.FormItem, {
-									title: BDFDB.LanguageUtils.LanguageStrings.USER_SETTINGS_PROFILE_THEME_ACCENT,
+									title: BDFDB.LanguageUtils.LanguageStrings.ACCENT,
 									className: BDFDB.disCN.marginbottom20,
 									children: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.ColorSwatches, {
 										color: data.color7,

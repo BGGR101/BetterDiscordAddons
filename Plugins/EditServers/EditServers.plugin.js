@@ -2,7 +2,7 @@
  * @name EditServers
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 2.4.7
+ * @version 2.4.8
  * @description Allows you to locally edit Servers
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -114,6 +114,11 @@ module.exports = (_ => {
 			}
 			
 			onStart () {
+				BDFDB.PatchUtils.patch(this, BDFDB.LibraryModules.IconUtils, "getGuildIconURL", {after: e => {
+					let data = changedGuilds[e.methodArguments[0].id];
+					if (data && e.returnValue) e.returnValue = data.removeIcon ? "" : data.url || e.returnValue;
+				}});
+				
 				BDFDB.PatchUtils.patch(this, BDFDB.LibraryModules.IconUtils, "getGuildBannerURL", {instead: e => {
 					let guild = BDFDB.LibraryStores.GuildStore.getGuild(e.methodArguments[0].id);
 					if (guild) {
@@ -359,14 +364,8 @@ module.exports = (_ => {
 					newGuildObject.toString = _ => newGuildObject.name;
 					newGuildObject.name = data.name || nativeObject.name;
 					newGuildObject.acronym = data.shortName && data.shortName.replace(/\s/g, "") || BDFDB.StringUtils.getAcronym(!data.ignoreCustomName && data.name || nativeObject.name);
-					if (data.removeIcon) {
-						newGuildObject.icon = null;
-						newGuildObject.getIconURL = _ => {return null;};
-					}
-					else if (data.url) {
-						newGuildObject.icon = data.url;
-						newGuildObject.getIconURL = _ => {return data.url;};
-					}
+					if (data.removeIcon) newGuildObject.icon = null;
+					else if (data.url) newGuildObject.icon = data.url;
 					if (data.removeBanner) newGuildObject.banner = null;
 					else if (data.banner) newGuildObject.banner = data.banner;
 					return newGuildObject;

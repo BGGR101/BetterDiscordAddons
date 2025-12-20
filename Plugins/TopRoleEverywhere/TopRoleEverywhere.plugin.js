@@ -2,7 +2,7 @@
  * @name TopRoleEverywhere
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 3.2.0
+ * @version 3.2.3
  * @description Adds the highest Role of a User as a Tag
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -68,7 +68,7 @@ module.exports = (_ => {
 						useOtherStyle:		{value: false, 	description: "Use BotTag Style instead of the Role Style"},
 						useBlackFont:		{value: false, 	description: "Use black Font instead of darkening the Color for BotTag Style on bright Colors"},
 						includeColorless:	{value: false, 	description: "Include colorless Roles"},
-						showOwnerRole:		{value: false, 	description: `Display Role Tag of Server Owner as "${BDFDB.LanguageUtils.LanguageStrings.GUILD_OWNER}".`},
+						showOwnerRole:		{value: false, 	description: `Display Role Tag of Server Owner as "${BDFDB.LanguageUtils.LanguageStrings.SERVER_OWNER}".`},
 						disableForBots:		{value: false, 	description: "Disable Role Tag for Bots"},
 						addUserId:		{value: false, 	description: "Add the User Id as a Tag to the Chat Window"},
 						userIdFirst:		{value: false, 	description: "Place the User Id before the Role Tag"}
@@ -120,7 +120,7 @@ module.exports = (_ => {
 					${BDFDB.dotCN._toproleseverywhererolestyle} {
 						display: inline-flex;
 						margin: 0 0 0 0.3rem;
-						color: var(--text-secondary)
+						color: var(--text-subtle)
 					}
 					${BDFDB.dotCNS._toproleseverywhererolestyle + BDFDB.dotCN.userrolecircle} {
 						flex: 0 0 auto;
@@ -210,11 +210,11 @@ module.exports = (_ => {
 				if (!BDFDB.ArrayUtils.is(children) || !user) return;
 				let guild = BDFDB.LibraryStores.GuildStore.getGuild(BDFDB.LibraryStores.SelectedGuildStore.getGuildId());
 				if (!guild || user.bot && this.settings.general.disableForBots) return;
-				let role = BDFDB.LibraryModules.PermissionRoleUtils.getHighestRole(guild, user.id);
-				if (this.settings.general.showOwnerRole && user.id == guild.ownerId) role = Object.assign({}, role, {name: BDFDB.LanguageUtils.LanguageStrings.GUILD_OWNER, ownerRole: true});
+				let member = BDFDB.LibraryStores.GuildMemberStore.getMember(guild.id, user.id);
+				let role = member && BDFDB.LibraryStores.GuildRoleStore.getRole(guild.id, member.highestRoleId);
+				if (this.settings.general.showOwnerRole && user.id == guild.ownerId) role = Object.assign({}, role, {name: BDFDB.LanguageUtils.LanguageStrings.SERVER_OWNER, ownerRole: true});
 				if (role && !role.colorString && !this.settings.general.includeColorless && !role.ownerRole) {
-					let member = BDFDB.LibraryStores.GuildMemberStore.getMember(guild.id, user.id);
-					if (member) for (let sortedRole of BDFDB.ArrayUtils.keySort(member.roles.map(roleId => BDFDB.LibraryStores.GuildRoleStore.getRole(guild.id, roleId)), "position").reverse()) if (sortedRole.colorString) {
+					for (let sortedRole of BDFDB.ArrayUtils.keySort(member.roles.map(roleId => BDFDB.LibraryStores.GuildRoleStore.getRole(guild.id, roleId)), "position").reverse()) if (sortedRole.colorString) {
 						role = sortedRole;
 						break;
 					}

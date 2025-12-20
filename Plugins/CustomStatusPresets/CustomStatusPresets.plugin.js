@@ -2,7 +2,7 @@
  * @name CustomStatusPresets
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.3.2
+ * @version 1.3.5
  * @description Allows you to save Custom Statuses as Quick Select and select them by right-clicking the Status Bubble
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -214,7 +214,7 @@ module.exports = (_ => {
 								BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Select, {
 									className: BDFDB.disCN.flexchild,
 									value: ClearAfterValues[presets[id].clearAfter] || presets[id].clearAfter,
-									options: Object.entries(ClearAfterValues).map(entry => ({value: entry[1], label: !entry[1] || entry[1] == ClearAfterValues.DONT_CLEAR ? BDFDB.LanguageUtils.LanguageStrings.DISPLAY_OPTION_NEVER : entry[1] == ClearAfterValues.TODAY ? BDFDB.LanguageUtils.LanguageStrings.CUSTOM_STATUS_TODAY : BDFDB.LanguageUtils.LanguageStringsFormat("CUSTOM_STATUS_HOURS", entry[1]/3600000)})),
+									options: Object.entries(ClearAfterValues).map(entry => ({value: entry[1], label: !entry[1] || entry[1] == ClearAfterValues.DONT_CLEAR ? BDFDB.LanguageUtils.LanguageStrings.NEVER : entry[1] == ClearAfterValues.TODAY ? BDFDB.LanguageUtils.LanguageStrings.TODAY : BDFDB.LanguageUtils.LanguageStringsFormat("CLEAR_AFTER", `${entry[1]/3600000}h`)})),
 									onChange: value => {
 										presets[id].clearAfter = value;
 										BDFDB.DataUtils.save(presets, _this, "presets");
@@ -251,7 +251,6 @@ module.exports = (_ => {
 						"ModalRoot"
 					],
 					after: [
-						"CustomStatusModal",
 						"CustomStatusModalWithPreview",
 						"UserPopoutStatusBubble",
 						"UserPopoutStatusBubbleEmpty"
@@ -259,8 +258,9 @@ module.exports = (_ => {
 				};
 				
 				this.css = `
-					${BDFDB.dotCN.customstatusmodal} {
-						min-width: 440px;
+					${BDFDB.dotCN.modalcontainer}:has(${BDFDB.dotCN.customstatusmodalprofilepreview}) {
+						min-width: 640px;
+						max-width: unset;
 						width: unset;
 					}
 					${BDFDB.dotCN.animationcontainerscale + BDFDB.dotCN.animationcontainerrender} {
@@ -365,7 +365,7 @@ module.exports = (_ => {
 									className: BDFDB.disCN._customstatuspresetscustomstatusitem,
 									children: [
 										BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TooltipContainer, {
-											text: BDFDB.LanguageUtils.LanguageStrings.CUSTOM_STATUS_CLEAR_CUSTOM_STATUS,
+											text: BDFDB.LanguageUtils.LanguageStrings.CLEAR_CUSTOM_STATUS,
 											tooltipConfig: {
 												zIndex: 2001
 											},
@@ -398,7 +398,7 @@ module.exports = (_ => {
 										})
 									]
 								}),
-								hint: !clearAfter || clearAfter == ClearAfterValues.DONT_CLEAR ? BDFDB.LanguageUtils.LanguageStrings.DISPLAY_OPTION_NEVER : clearAfter == ClearAfterValues.TODAY ? BDFDB.LanguageUtils.LanguageStrings.CUSTOM_STATUS_TODAY : BDFDB.LanguageUtils.LanguageStringsFormat("CUSTOM_STATUS_HOURS", clearAfter/3600000),
+								hint: !clearAfter || clearAfter == ClearAfterValues.DONT_CLEAR ? BDFDB.LanguageUtils.LanguageStrings.NEVER : clearAfter == ClearAfterValues.TODAY ? BDFDB.LanguageUtils.LanguageStrings.TODAY : BDFDB.LanguageUtils.LanguageStringsFormat("AFTER_PLACEHOLDER", `${clearAfter/3600000}h`),
 								action: _ => {
 									if (!presets[id]) return;
 									let expiresAt = clearAfter && clearAfter != ClearAfterValues.DONT_CLEAR ? clearAfter : null;
@@ -426,12 +426,8 @@ module.exports = (_ => {
 			}
 			
 			processCustomStatusModalWithPreview (e) {
-				let footer = BDFDB.ReactUtils.findChild(e.returnvalue, {name: "ModalFooter"});
-				if (!footer) return;
-				footer.props.children.props.children.splice(1, 0, BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Button, {
-					color: BDFDB.disCN.modalcancelbutton,
-					look: BDFDB.LibraryComponents.Button.Looks.LINK,
-					style: {marginLeft: "auto"},
+				e.returnvalue.props.actions.splice(-1, 0, {
+					text: this.labels.modal_savepreset,
 					onClick: event => {
 						BDFDB.PatchUtils.patch(this, BDFDB.LibraryModules.CustomStatusStore, "update", {instead: e2 => {
 							let id = BDFDB.NumberUtils.generateId(Object.keys(presets));
@@ -445,27 +441,9 @@ module.exports = (_ => {
 							if (!event.shiftKey) e.instance.props.onClose();
 							else id = BDFDB.NumberUtils.generateId(Object.keys(presets));
 						}}, {once: true});
-						footer.props.children.props.children[2].props.onClick();
-					},
-					children: this.labels.modal_savepreset
-				}));
-			}
-			
-			processCustomStatusModal (e) {
-				let footer = BDFDB.ReactUtils.findChild(e.returnvalue, {name: "ModalFooter"});
-				if (!footer) return;
-				footer.props.children.splice(1, 0, BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Button, {
-					color: BDFDB.disCN.modalcancelbutton,
-					look: BDFDB.LibraryComponents.Button.Looks.LINK,
-					onClick: event => {
-						let id = BDFDB.NumberUtils.generateId(Object.keys(presets));
-						presets[id] = Object.assign({pos: Object.keys(presets).length}, BDFDB.ObjectUtils.extract(e.instance.state, "clearAfter", "emojiInfo", "status", "text"));
-						BDFDB.DataUtils.save(presets, this, "presets");
-						if (!event.shiftKey) e.instance.props.onClose();
-						else id = BDFDB.NumberUtils.generateId(Object.keys(presets));
-					},
-					children: this.labels.modal_savepreset
-				}));
+						e.returnvalue.props.actions[e.returnvalue.props.actions.length-1].onClick();
+					}
+				});
 			}
 
 			setLabelsByLanguage () {

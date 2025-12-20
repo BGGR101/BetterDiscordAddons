@@ -2,7 +2,7 @@
  * @name EditRoles
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.2.2
+ * @version 1.2.6
  * @description Allows you to locally edit Roles
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -70,7 +70,8 @@ module.exports = (_ => {
 						"AutocompleteRoleResult",
 						"ChannelMembers",
 						"MemberListItem",
-						"MessageContent"
+						"MessageContent",
+						"RichRoleMention"
 					],
 					after: [
 						"RichRoleMention"
@@ -79,25 +80,15 @@ module.exports = (_ => {
 			}
 			
 			onStart () {
-				BDFDB.PatchUtils.patch(this, BDFDB.LibraryModules.PermissionRoleUtils, "getHighestRole", {after: e => {
-					if (e.returnValue && changedRoles[e.returnValue.id]) {
-						let data = changedRoles[e.returnValue.id];
-						e.returnValue = Object.assign({}, e.returnValue, {
-							name: data.name || e.returnValue.name,
-							color: data.color ? BDFDB.ColorUtils.convert(data.color, "INT") : e.returnValue.color,
-							colorString: data.color ? BDFDB.ColorUtils.convert(data.color, "HEX") : e.returnValue.colorString
-						});
-					}
-				}});
 				BDFDB.PatchUtils.patch(this, BDFDB.LibraryStores.GuildMemberStore, "getMember", {after: e => {
 					if (e.returnValue) {
 						let guild = BDFDB.LibraryStores.GuildStore.getGuild(e.methodArguments[0]);
 						if (guild) {
 							let colorRole, iconRole;
 							for (let id of e.returnValue.roles) {
-								let roles = guild.roles || BDFDB.LibraryStores.GuildRoleStore.getRoles(guild.id);
-								if (roles && [id] && (roles[id].colorString || changedRoles[id] && changedRoles[id].color) && (!colorRole || colorRole.position < roles[id].position)) colorRole = roles[id];
-								if (roles && roles[id] && (roles[id].icon || changedRoles[id] && changedRoles[id].icon) && (!iconRole || iconRole.position < roles[id].position)) iconRole = roles[id];
+								let role = BDFDB.LibraryStores.GuildRoleStore.getRole(guild.id, id);
+								if (role && (role.colorString || changedRoles[id] && changedRoles[id].color) && (!colorRole || colorRole.position < role.position)) colorRole = role;
+								if (role && (role.icon || changedRoles[id] && changedRoles[id].icon) && (!iconRole || iconRole.position < role.position)) iconRole = role;
 							}
 							let color = colorRole && changedRoles[colorRole.id] && changedRoles[colorRole.id].color;
 							if (color) e.returnValue = Object.assign({}, e.returnValue, {colorString: BDFDB.ColorUtils.convert(color, "HEX")});
@@ -105,7 +96,7 @@ module.exports = (_ => {
 						}
 					}
 				}});
-				BDFDB.PatchUtils.patch(this, BDFDB.LibraryStores.GuildRoleStore, "getRoles", {after: e => {
+				BDFDB.PatchUtils.patch(this, BDFDB.LibraryStores.GuildRoleStore, ["getRoles", "getRolesSnapshot", "getUnsafeMutableRoles"], {after: e => {
 					if (e.returnValue) {
 						let roles = Object.assign({}, e.returnValue);
 						for (let id in roles) {
@@ -130,8 +121,8 @@ module.exports = (_ => {
 				}});
 				BDFDB.PatchUtils.patch(this, BDFDB.LibraryModules.RoleIconUtils, "canGuildUseRoleIcons", {after: e => {
 					if (e.returnValue !== false) return e.returnValue;
-					let roles = e.methodArguments[0].roles || BDFDB.LibraryStores.GuildRoleStore.getRoles(e.methodArguments[0].id);
-					if (Object.keys(roles).some(roleId => changedRoles[roleId] && changedRoles[roleId].icon)) return true;
+					let roles = BDFDB.LibraryStores.GuildRoleStore.getSortedRoles(e.methodArguments[0].id);
+					if (roles.some(role => changedRoles[role.id] && changedRoles[role.id].icon)) return true;
 				}});
 				
 				this.forceUpdateAll();
@@ -197,7 +188,7 @@ module.exports = (_ => {
 			}
 
 			onDeveloperContextMenu (e) {
-				if (e.instance.props.label != BDFDB.LanguageUtils.LanguageStrings.COPY_ID_ROLE) return;
+				if (e.instance.props.label != BDFDB.LanguageUtils.LanguageStrings.COPY_ROLE_ID) return;
 				let guild = this.getGuildFromRoleId(e.instance.props.id);
 				if (guild) e.returnvalue.props.children = [
 					BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuGroup, {
@@ -209,7 +200,7 @@ module.exports = (_ => {
 									BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuItem, {
 										label: this.labels.submenu_rolesettings,
 										id: BDFDB.ContextMenuUtils.createItemId(this.name, "settings-change"),
-										action: _ => this.openRoleSettingsModal((guild.roles || BDFDB.LibraryStores.GuildRoleStore.getRoles(guild.id) || [])[e.instance.props.id])
+										action: _ => this.openRoleSettingsModal(BDFDB.LibraryStores.GuildRoleStore.getRole(guild.id, e.instance.props.id))
 									}),
 									BDFDB.ContextMenuUtils.createItem(BDFDB.LibraryComponents.MenuItems.MenuItem, {
 										label: this.labels.submenu_resetsettings,
@@ -242,9 +233,14 @@ module.exports = (_ => {
 			}
 			
 			processRichRoleMention (e) {
-				if (!e.instance.props.id || !changedRoles[e.instance.props.id]) return;
-				e.returnvalue.props.color = changedRoles[e.instance.props.id].color ? BDFDB.ColorUtils.convert(changedRoles[e.instance.props.id].color, "int") : e.returnvalue.props.color;
-				e.returnvalue.props.children[2] = changedRoles[e.instance.props.id].name || e.returnvalue.props.children[1];
+				if (!e.instance.props.roleId || !changedRoles[e.instance.props.roleId]) return;
+				if (!e.returnvalue) {
+					e.instance.props.color = changedRoles[e.instance.props.roleId].color ? BDFDB.ColorUtils.convert(changedRoles[e.instance.props.roleId].color, "int") : e.returnvalue.props.color;
+					e.instance.props.roleColor = e.instance.props.color;
+					e.instance.props.colorString = BDFDB.ColorUtils.convert(e.instance.props.color, "hex");
+					e.instance.props.children = ["@" + changedRoles[e.instance.props.roleId].name] || e.instance.props.children;
+				}
+				else e.returnvalue.props.children.props.color = e.instance.props.color;
 			}
 			
 			processAutocompleteRoleResult (e) {
@@ -275,10 +271,7 @@ module.exports = (_ => {
 			}
 			
 			getGuildFromRoleId (roleId) {
-				return BDFDB.LibraryStores.SortedGuildStore.getFlattenedGuildIds().map(BDFDB.LibraryStores.GuildStore.getGuild).find(guild => {
-					let roles = guild.roles || BDFDB.LibraryStores.GuildRoleStore.getRoles(guild.id);
-					return roles && roles[roleId];
-				});
+				return BDFDB.LibraryStores.SortedGuildStore.getFlattenedGuildIds().map(BDFDB.LibraryStores.GuildStore.getGuild).find(guild => !!BDFDB.LibraryStores.GuildRoleStore.getRole(guild.id, roleId));
 			}
 			
 			resetRoles (id) {
@@ -298,7 +291,7 @@ module.exports = (_ => {
 					subHeader: role.name,
 					children: [
 						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.FormItem, {
-							title: BDFDB.LanguageUtils.LanguageStrings.FORM_LABEL_ROLE_NAME,
+							title: BDFDB.LanguageUtils.LanguageStrings.ROLE_NAME,
 							className: BDFDB.disCN.marginbottom20,
 							children: [
 								BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TextInput, {
@@ -313,7 +306,7 @@ module.exports = (_ => {
 							]
 						}),
 						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.FormItem, {
-							title: BDFDB.LanguageUtils.LanguageStrings.FORM_LABEL_ROLE_COLOR,
+							title: BDFDB.LanguageUtils.LanguageStrings.ROLE_COLOR,
 							className: BDFDB.disCN.marginbottom20,
 							children: [
 								BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.ColorSwatches, {
@@ -341,7 +334,7 @@ module.exports = (_ => {
 										BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.FormTitle.Title, {
 											className: BDFDB.disCN.marginreset,
 											tag: BDFDB.LibraryComponents.FormTitle.Tags.H5,
-											children: BDFDB.LanguageUtils.LanguageStrings.FORM_LABEL_ROLE_ICON
+											children: BDFDB.LanguageUtils.LanguageStrings.ROLE_ICON
 										}),
 										BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SettingsItem, {
 											type: "Switch",

@@ -2,7 +2,7 @@
  * @name ServerHider
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 6.3.3
+ * @version 6.3.4
  * @description Allows you to hide certain Servers in your Server List
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--text-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -258,7 +258,7 @@ module.exports = (_ => {
 										})
 									}),
 									label: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.TextScroller, {
-										children: folder.folderName || `${BDFDB.LanguageUtils.LanguageStrings.SERVER_FOLDER_PLACEHOLDER} #${folders.indexOf(folder) + 1}`
+										children: folder.folderName || `${BDFDB.LanguageUtils.LanguageStrings.FOLDER} #${folders.indexOf(folder) + 1}`
 									}),
 									suffix: BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Switch, {
 										value: !hiddenFolderIds.includes(folder.folderId),
@@ -291,7 +291,7 @@ module.exports = (_ => {
 						color: "BRAND",
 						close: true
 					}, {
-						contents: BDFDB.LanguageUtils.LanguageStrings.FORM_LABEL_ALL,
+						contents: BDFDB.LanguageUtils.LanguageStrings.ALL,
 						color: "TRANSPARENT",
 						look: "LINK",
 						onClick: (modal, instance) => {

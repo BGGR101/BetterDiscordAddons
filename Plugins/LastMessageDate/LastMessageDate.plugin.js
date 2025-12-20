@@ -2,7 +2,7 @@
  * @name LastMessageDate
  * @author DevilBro
  * @authorId 278543574059057154
- * @version 1.5.1
+ * @version 1.5.4
  * @description Displays the Last Message Date of a Member for the current Server/DM in the UserPopout and UserModal
  * @invite Jx3TjNS
  * @donate https://www.paypal.me/MircoWittrien
@@ -56,7 +56,7 @@ module.exports = (_ => {
 		stop () {}
 		getSettingsPanel () {
 			let template = document.createElement("template");
-			template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
+			template.innerHTML = `<div style="color: var(--text-strong); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">The Library Plugin needed for ${this.name} is missing.\nPlease click <a style="font-weight: 500;">Download Now</a> to install it.</div>`;
 			template.content.firstElementChild.querySelector("a").addEventListener("click", this.downloadLibrary);
 			return template.content.firstElementChild;
 		}
@@ -65,7 +65,7 @@ module.exports = (_ => {
 		var loadedUsers, requestedUsers, queuedInstances;
 		var currentPopout, currentProfile;
 		
-		const LastMessageDateComponents = class LastMessageDate extends BdApi.React.Component {
+		const LastMessageDateComponent = class LastMessageDate extends BdApi.React.Component {
 			render() {
 				if (!loadedUsers[this.props.guildId]) loadedUsers[this.props.guildId] = {};
 				if (!requestedUsers[this.props.guildId]) requestedUsers[this.props.guildId] = {};
@@ -108,7 +108,7 @@ module.exports = (_ => {
 						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Heading, {
 							className: BDFDB.disCN.userprofilesectionheading,
 							variant: "text-xs/semibold",
-							style: {color: "var(--header-secondary)"},
+							style: {color: "var(--header-primary)"},
 							color: null,
 							children: _this.labels.last_message
 						}),
@@ -156,7 +156,7 @@ module.exports = (_ => {
 					],
 					after: [
 						"UserHeaderUsername",
-						"UserProfileInfoSection"
+						"UserProfile"
 					]
 				};
 				
@@ -237,10 +237,8 @@ module.exports = (_ => {
 
 			processUserThemeContainer (e) {
 				let popout = {props: e.instance.props.value || e.instance.props};
-				if (popout.props.layout == "POPOUT") currentPopout = popout;
-				if (popout.props.layout == "BITE_SIZE_POPOUT") currentPopout = popout;
-				if (popout.props.layout == "MODAL") currentProfile = popout;
-				if (popout.props.layout == "SIMPLIFIED_MODAL") currentProfile = popout;
+				if (popout.props.layout == BDFDB.DiscordConstants.ProfileTypes.POPOUT) currentPopout = popout;
+				if (popout.props.layout == BDFDB.DiscordConstants.ProfileTypes.MODAL || popout.props.layout == BDFDB.DiscordConstants.ProfileTypes.MODAL_V2) currentProfile = popout;
 			}
 
 			processUserHeaderUsername (e) {
@@ -249,7 +247,7 @@ module.exports = (_ => {
 				let user = e.instance.props.user || BDFDB.LibraryStores.UserStore.getUser(e.instance.props.userId);
 				if (!user || user.isNonUserBot()) return;
 				e.returnvalue = [e.returnvalue].flat(10);
-				e.returnvalue.push(BDFDB.ReactUtils.createElement(LastMessageDateComponents, {
+				e.returnvalue.push(BDFDB.ReactUtils.createElement(LastMessageDateComponent, {
 					isInPopout: true,
 					guildId: currentPopout.props.guildId || BDFDB.DiscordConstants.ME,
 					channelId: currentPopout.props.channelId,
@@ -258,19 +256,18 @@ module.exports = (_ => {
 				}, true));
 			}
 
-			processUserProfileInfoSection (e) {
-				if (!currentProfile) return;
-				let user = e.instance.props.user || BDFDB.LibraryStores.UserStore.getUser(e.instance.props.userId);
+			processUserProfile (e) {
+				if (!currentProfile || e.instance.props.themeType != BDFDB.DiscordConstants.ProfileTypes.MODAL_V2) return;
+				let user = currentProfile.props.user || BDFDB.LibraryStores.UserStore.getUser(currentProfile.props.userId);
 				if (!user || user.isNonUserBot()) return;
-				let [children, index] = BDFDB.ReactUtils.findParent(e.returnvalue, {props: [["heading", BDFDB.LanguageUtils.LanguageStrings.USER_PROFILE_MEMBER_SINCE]]});
-				if (index > -1) children.splice(index, 0, BDFDB.ReactUtils.createElement(LastMessageDateComponents, {
+				let [children, index] = BDFDB.ReactUtils.findParent(e.returnvalue, {props: [["heading", BDFDB.LanguageUtils.LanguageStrings.MEMBER_SINCE]]});
+				if (index > -1) children.splice(index, 0, BDFDB.ReactUtils.createElement(LastMessageDateComponent, {
 					isInPopout: false,
 					guildId: currentProfile.props.guildId || BDFDB.DiscordConstants.ME,
 					channelId: currentProfile.props.channelId,
 					isGuild: !!currentProfile.props.guildId,
 					user: user
 				}, true));
-
 			}
 
 			setLabelsByLanguage () {
